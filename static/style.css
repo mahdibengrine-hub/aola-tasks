@@ -1,102 +1,159 @@
-/* AOLA Tasks — mobile-first */
+/* AOLA Tasks — design mobile-first, epure */
 :root{
-  --bg:#faf7f1; --ink:#1f1d18; --muted:#7a7466;
-  --gold:#c8a84b; --green:#1d9e75; --red:#c8455f;
-  --card:#fff; --line:#ebe6da; --soft:#fdfcf7;
+  --bg:#f6f2ea;
+  --ink:#1a1814;
+  --ink-soft:#4a4439;
+  --muted:#8a8273;
+  --gold:#c19a3f;
+  --gold-soft:#e8d8a8;
+  --green:#0f9d6a;
+  --red:#d23a5b;
+  --card:#ffffff;
+  --line:#e8e1d1;
+  --soft:#faf6ec;
+  --shadow:0 1px 2px rgba(28,22,12,.04), 0 8px 24px rgba(28,22,12,.05);
 }
-*{box-sizing:border-box}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Arial,sans-serif;
-  font-size:16px;line-height:1.45}
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;
+  font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
 a{color:var(--gold);text-decoration:none}
 
+/* ── Topbar ─────────────────────────────────────────── */
 .topbar{display:flex;align-items:center;justify-content:space-between;
-  padding:14px 16px;background:#fff;border-bottom:1px solid var(--line);
-  position:sticky;top:0;z-index:10}
-.brand{font-weight:600;letter-spacing:.5px}
-.topnav a{margin-left:14px;color:var(--muted);font-size:14px}
-.topnav a.active{color:var(--ink);font-weight:600}
+  padding:18px 20px;background:#fff;
+  border-bottom:1px solid var(--line);
+  position:sticky;top:0;z-index:50}
+.brand{font-weight:700;font-size:17px;letter-spacing:.2px}
+.brand::before{content:"✦ ";color:var(--gold)}
+.topnav{display:flex;gap:4px}
+.topnav a{padding:8px 14px;border-radius:999px;color:var(--muted);
+  font-size:14px;font-weight:500;transition:all .15s}
+.topnav a.active{color:var(--ink);background:var(--soft)}
 
-main{max-width:720px;margin:0 auto;padding:14px}
+main{max-width:760px;margin:0 auto;padding:20px 16px 80px}
 
-.hero{padding:8px 4px 16px}
-.hero-title{font-size:22px;font-weight:600}
-.hero-date{color:var(--muted);font-size:13px;text-transform:capitalize;margin-bottom:4px}
+/* ── Hero ───────────────────────────────────────────── */
+.hero{padding:20px 4px 24px}
+.hero-date{color:var(--gold);font-size:13px;font-weight:600;
+  text-transform:uppercase;letter-spacing:1.2px;margin-bottom:6px}
+.hero-title{font-size:28px;font-weight:700;letter-spacing:-.5px;line-height:1.15}
 
-.section-title{font-size:14px;text-transform:uppercase;letter-spacing:.5px;
-  color:var(--muted);margin:22px 0 8px;padding-left:4px}
+/* ── Section title ──────────────────────────────────── */
+.section-title{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;
+  font-weight:700;color:var(--muted);margin:28px 4px 12px;
+  display:flex;align-items:center;gap:8px}
 .section-title.danger{color:var(--red)}
 
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;
-  padding:14px;margin-bottom:14px}
-.card-h{font-weight:600;margin-bottom:10px;font-size:14px;color:var(--muted)}
+/* ── Cards ──────────────────────────────────────────── */
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;
+  padding:18px;margin-bottom:16px;box-shadow:var(--shadow)}
+.card-h{font-weight:600;margin-bottom:14px;font-size:15px;color:var(--ink-soft)}
 
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.col{display:flex;flex-direction:column;gap:10px}
+/* ── Inputs ─────────────────────────────────────────── */
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.col{display:flex;flex-direction:column;gap:12px}
 input[type=text], input[type=date], input:not([type]){
-  font:inherit;padding:11px 12px;border:1px solid var(--line);border-radius:8px;
-  background:#fff;flex:1;min-width:120px}
-input[type=date]{min-width:140px}
+  padding:14px 16px;border:1.5px solid var(--line);border-radius:12px;
+  background:#fff;flex:1;min-width:140px;font-size:16px;
+  transition:border-color .15s, box-shadow .15s}
+input[type=text]:focus, input[type=date]:focus, input:not([type]):focus{
+  outline:none;border-color:var(--gold);
+  box-shadow:0 0 0 4px rgba(193,154,63,.12)}
 
-button{font:inherit;cursor:pointer;border:none;border-radius:8px;
-  padding:11px 14px;background:var(--ink);color:#fff}
-.btn-primary{background:var(--gold);color:#1f1d18;font-weight:600}
-.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--line);padding:8px 12px}
-.btn-danger{background:transparent;color:var(--red);border:1px solid var(--line);padding:8px 12px}
+/* ── Buttons ────────────────────────────────────────── */
+button{cursor:pointer;border:none;border-radius:12px;
+  padding:14px 22px;font-size:15px;font-weight:600;
+  background:var(--ink);color:#fff;transition:transform .1s, opacity .15s}
+button:active{transform:scale(.97)}
+.btn-primary{background:var(--gold);color:#1a1814;
+  box-shadow:0 4px 14px rgba(193,154,63,.35)}
+.btn-primary:hover{background:#b08d34}
+.btn-ghost{background:#fff;color:var(--ink-soft);border:1.5px solid var(--line);padding:10px 16px;font-weight:500}
+.btn-ghost:hover{background:var(--soft)}
+.btn-danger{background:transparent;color:var(--red);border:1.5px solid #f5d4dc;padding:10px 16px;font-weight:500}
+.btn-danger:hover{background:#fde9ee}
 
+/* ── Day picker (recurring) ─────────────────────────── */
 .daypicker{display:flex;gap:6px;flex-wrap:wrap}
-.daypicker label{padding:8px 10px;border:1px solid var(--line);border-radius:8px;
-  font-size:13px;cursor:pointer;background:#fff}
-.daypicker input{margin-right:4px}
+.daypicker label{padding:10px 14px;border:1.5px solid var(--line);border-radius:10px;
+  font-size:13px;font-weight:500;cursor:pointer;background:#fff;
+  user-select:none;transition:all .12s}
+.daypicker label:has(input:checked){background:var(--ink);color:#fff;border-color:var(--ink)}
+.daypicker input{display:none}
 
-.tasks{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
-.task{display:flex;gap:12px;align-items:flex-start;
-  background:var(--card);border:1px solid var(--line);border-radius:12px;
-  padding:12px}
-.task.muted{opacity:.55}
-.task.late{border-color:var(--red)}
+/* ── Task list ──────────────────────────────────────── */
+.tasks{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px}
+.task{display:flex;gap:14px;align-items:flex-start;
+  background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:16px;box-shadow:var(--shadow);transition:transform .1s}
+.task.muted{opacity:.5}
+.task.late{border-color:#f5c2cd;background:#fffafb}
 .task-body{flex:1;min-width:0}
-.task-title{font-weight:500;word-break:break-word}
-.task-title.strike{text-decoration:line-through;color:var(--muted)}
-.task-meta{font-size:12px;color:var(--muted);margin-top:2px}
+.task-title{font-weight:600;font-size:16px;word-break:break-word;line-height:1.35}
+.task-title.strike{text-decoration:line-through;color:var(--muted);font-weight:500}
+.task-meta{font-size:13px;color:var(--muted);margin-top:4px}
 .task-actions{display:flex;gap:6px;align-items:center}
-.badge{display:inline-block;font-size:11px;color:var(--muted);
-  background:var(--soft);border:1px solid var(--line);border-radius:6px;
-  padding:1px 6px;margin-left:6px}
+.badge{display:inline-block;font-size:11px;font-weight:600;color:var(--gold);
+  background:var(--soft);border-radius:999px;
+  padding:3px 9px;margin-left:6px;text-transform:uppercase;letter-spacing:.5px}
 
-.check{width:44px;height:44px;border-radius:12px;background:var(--soft);
-  border:1px solid var(--line);color:var(--ink);font-size:22px;
-  display:flex;align-items:center;justify-content:center;padding:0}
-.check.checked{background:#eaf6f0;border-color:#bfe3d0}
+/* Big check button — main employee action */
+.check{width:52px;height:52px;border-radius:14px;background:var(--soft);
+  border:2px solid var(--line);color:var(--ink);font-size:24px;
+  display:flex;align-items:center;justify-content:center;padding:0;
+  flex-shrink:0;font-weight:600}
+.check:hover{background:var(--gold-soft);border-color:var(--gold)}
+.check.checked{background:#e6f7ee;border-color:#9ee0bc;color:var(--green)}
 
-details summary{cursor:pointer;list-style:none}
+details summary{cursor:pointer;list-style:none;padding:2px 0}
 details summary::-webkit-details-marker{display:none}
+details[open] summary{margin-bottom:8px}
 
-.empty{padding:30px 14px;text-align:center;color:var(--muted);
-  background:var(--card);border:1px dashed var(--line);border-radius:12px}
-.empty.soft{padding:18px;font-size:14px}
+/* ── Empty states ───────────────────────────────────── */
+.empty{padding:40px 20px;text-align:center;color:var(--muted);
+  background:var(--card);border:1.5px dashed var(--line);border-radius:18px;
+  font-size:15px}
+.empty.soft{padding:22px;font-size:14px}
 
-/* Calendrier */
-.cal{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+/* ── Calendrier ─────────────────────────────────────── */
+.cal{background:var(--card);border:1px solid var(--line);
+  border-radius:18px;overflow:hidden;box-shadow:var(--shadow)}
 .cal-head{display:grid;grid-template-columns:repeat(7,1fr);
   background:var(--soft);border-bottom:1px solid var(--line);
-  font-size:12px;color:var(--muted);text-align:center;padding:8px 0}
+  font-size:11px;font-weight:700;color:var(--muted);text-align:center;
+  padding:10px 0;text-transform:uppercase;letter-spacing:1px}
 .cal-row{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:1px solid var(--line)}
 .cal-row:last-child{border-bottom:none}
-.cal-cell{min-height:74px;padding:6px;border-right:1px solid var(--line);font-size:12px}
+.cal-cell{min-height:88px;padding:8px;border-right:1px solid var(--line);font-size:12px}
 .cal-cell:last-child{border-right:none}
-.cal-cell.today{background:#fffbe8}
-.cal-cell.past{opacity:.5}
-.cal-date{font-weight:600;color:var(--muted);font-size:11px;margin-bottom:4px}
-.cal-task{background:var(--gold);color:#1f1d18;border-radius:5px;padding:2px 5px;
-  margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.cal-task.done{background:#eaf6f0;color:var(--muted);text-decoration:line-through}
+.cal-cell.today{background:#fff8e1}
+.cal-cell.past{opacity:.45}
+.cal-date{font-weight:700;color:var(--ink-soft);font-size:13px;margin-bottom:5px}
+.cal-cell.today .cal-date{color:var(--gold)}
+.cal-task{background:var(--gold);color:#1a1814;border-radius:6px;padding:3px 6px;
+  margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  font-weight:500;font-size:11px}
+.cal-task.done{background:#e6f7ee;color:var(--muted);text-decoration:line-through}
 
-/* Mobile spacing tweaks */
+/* ── Mobile ─────────────────────────────────────────── */
 @media (max-width:560px){
+  .topbar{padding:14px 16px}
+  .hero{padding:14px 2px 18px}
+  .hero-title{font-size:24px}
+  main{padding:14px 12px 100px}
+  .card{padding:16px;border-radius:16px}
+  .task{padding:14px}
   .row{flex-direction:column;align-items:stretch}
   input[type=text], input[type=date], input:not([type]){width:100%}
+  button{width:100%;padding:16px 20px;font-size:16px}
+  .btn-ghost, .btn-danger{padding:12px 18px;font-size:14px}
   .task-actions{flex-direction:column}
-  .cal-cell{min-height:56px;font-size:11px}
-  .cal-task{font-size:10px;padding:1px 3px}
+  .cal-cell{min-height:62px;padding:5px;font-size:11px}
+  .cal-task{font-size:10px;padding:2px 4px}
+  .check{width:48px;height:48px}
 }
+
+/* Tiny touch */
+::selection{background:var(--gold-soft);color:var(--ink)}
