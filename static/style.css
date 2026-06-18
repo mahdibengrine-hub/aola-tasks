@@ -1,0 +1,102 @@
+/* AOLA Tasks — mobile-first */
+:root{
+  --bg:#faf7f1; --ink:#1f1d18; --muted:#7a7466;
+  --gold:#c8a84b; --green:#1d9e75; --red:#c8455f;
+  --card:#fff; --line:#ebe6da; --soft:#fdfcf7;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Arial,sans-serif;
+  font-size:16px;line-height:1.45}
+a{color:var(--gold);text-decoration:none}
+
+.topbar{display:flex;align-items:center;justify-content:space-between;
+  padding:14px 16px;background:#fff;border-bottom:1px solid var(--line);
+  position:sticky;top:0;z-index:10}
+.brand{font-weight:600;letter-spacing:.5px}
+.topnav a{margin-left:14px;color:var(--muted);font-size:14px}
+.topnav a.active{color:var(--ink);font-weight:600}
+
+main{max-width:720px;margin:0 auto;padding:14px}
+
+.hero{padding:8px 4px 16px}
+.hero-title{font-size:22px;font-weight:600}
+.hero-date{color:var(--muted);font-size:13px;text-transform:capitalize;margin-bottom:4px}
+
+.section-title{font-size:14px;text-transform:uppercase;letter-spacing:.5px;
+  color:var(--muted);margin:22px 0 8px;padding-left:4px}
+.section-title.danger{color:var(--red)}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:14px;margin-bottom:14px}
+.card-h{font-weight:600;margin-bottom:10px;font-size:14px;color:var(--muted)}
+
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.col{display:flex;flex-direction:column;gap:10px}
+input[type=text], input[type=date], input:not([type]){
+  font:inherit;padding:11px 12px;border:1px solid var(--line);border-radius:8px;
+  background:#fff;flex:1;min-width:120px}
+input[type=date]{min-width:140px}
+
+button{font:inherit;cursor:pointer;border:none;border-radius:8px;
+  padding:11px 14px;background:var(--ink);color:#fff}
+.btn-primary{background:var(--gold);color:#1f1d18;font-weight:600}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--line);padding:8px 12px}
+.btn-danger{background:transparent;color:var(--red);border:1px solid var(--line);padding:8px 12px}
+
+.daypicker{display:flex;gap:6px;flex-wrap:wrap}
+.daypicker label{padding:8px 10px;border:1px solid var(--line);border-radius:8px;
+  font-size:13px;cursor:pointer;background:#fff}
+.daypicker input{margin-right:4px}
+
+.tasks{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
+.task{display:flex;gap:12px;align-items:flex-start;
+  background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:12px}
+.task.muted{opacity:.55}
+.task.late{border-color:var(--red)}
+.task-body{flex:1;min-width:0}
+.task-title{font-weight:500;word-break:break-word}
+.task-title.strike{text-decoration:line-through;color:var(--muted)}
+.task-meta{font-size:12px;color:var(--muted);margin-top:2px}
+.task-actions{display:flex;gap:6px;align-items:center}
+.badge{display:inline-block;font-size:11px;color:var(--muted);
+  background:var(--soft);border:1px solid var(--line);border-radius:6px;
+  padding:1px 6px;margin-left:6px}
+
+.check{width:44px;height:44px;border-radius:12px;background:var(--soft);
+  border:1px solid var(--line);color:var(--ink);font-size:22px;
+  display:flex;align-items:center;justify-content:center;padding:0}
+.check.checked{background:#eaf6f0;border-color:#bfe3d0}
+
+details summary{cursor:pointer;list-style:none}
+details summary::-webkit-details-marker{display:none}
+
+.empty{padding:30px 14px;text-align:center;color:var(--muted);
+  background:var(--card);border:1px dashed var(--line);border-radius:12px}
+.empty.soft{padding:18px;font-size:14px}
+
+/* Calendrier */
+.cal{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.cal-head{display:grid;grid-template-columns:repeat(7,1fr);
+  background:var(--soft);border-bottom:1px solid var(--line);
+  font-size:12px;color:var(--muted);text-align:center;padding:8px 0}
+.cal-row{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:1px solid var(--line)}
+.cal-row:last-child{border-bottom:none}
+.cal-cell{min-height:74px;padding:6px;border-right:1px solid var(--line);font-size:12px}
+.cal-cell:last-child{border-right:none}
+.cal-cell.today{background:#fffbe8}
+.cal-cell.past{opacity:.5}
+.cal-date{font-weight:600;color:var(--muted);font-size:11px;margin-bottom:4px}
+.cal-task{background:var(--gold);color:#1f1d18;border-radius:5px;padding:2px 5px;
+  margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cal-task.done{background:#eaf6f0;color:var(--muted);text-decoration:line-through}
+
+/* Mobile spacing tweaks */
+@media (max-width:560px){
+  .row{flex-direction:column;align-items:stretch}
+  input[type=text], input[type=date], input:not([type]){width:100%}
+  .task-actions{flex-direction:column}
+  .cal-cell{min-height:56px;font-size:11px}
+  .cal-task{font-size:10px;padding:1px 3px}
+}
