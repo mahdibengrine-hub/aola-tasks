@@ -14,8 +14,10 @@ from flask import Flask, render_template, request, redirect, url_for, abort, g
 app = Flask(__name__)
 
 # ── Config ────────────────────────────────────────────────────────────────
-ADMIN_TOKEN    = os.environ.get('ADMIN_TOKEN', 'admin-dev')
-EMPLOYEE_TOKEN = os.environ.get('EMPLOYEE_TOKEN', 'emp-dev')
+def _env(key, default):
+    """Lit une variable d'env en enlevant les espaces autour (tolerant)."""
+    return (os.environ.get(key) or default).strip()
+
 DATA_DIR       = '/data' if os.path.isdir('/data') else os.path.join(os.path.dirname(__file__), 'data')
 DB_PATH        = os.path.join(DATA_DIR, 'tasks.db')
 os.makedirs(DATA_DIR, exist_ok=True)
@@ -100,15 +102,16 @@ def generate_today_recurring():
     db.commit()
 
 
-def require_token(token, expected):
-    if token != expected:
+def require_token(token, env_key):
+    expected = _env(env_key, '')
+    if (token or '').strip() != expected:
         abort(404)
 
 
 # ── Routes employe ────────────────────────────────────────────────────────
 @app.route('/e/<token>/')
 def employee_view(token):
-    require_token(token, EMPLOYEE_TOKEN)
+    require_token(token, 'EMPLOYEE_TOKEN')
     generate_today_recurring()
     db = get_db()
     td = today_iso()
@@ -125,7 +128,7 @@ def employee_view(token):
 
 @app.route('/e/<token>/done/<int:tid>', methods=['POST'])
 def employee_done(token, tid):
-    require_token(token, EMPLOYEE_TOKEN)
+    require_token(token, 'EMPLOYEE_TOKEN')
     db = get_db()
     db.execute('UPDATE task SET done_at=? WHERE id=? AND done_at IS NULL', (now_iso(), tid))
     db.commit()
@@ -135,7 +138,7 @@ def employee_done(token, tid):
 @app.route('/e/<token>/undo/<int:tid>', methods=['POST'])
 def employee_undo(token, tid):
     """Petit filet de securite : undo possible le meme jour seulement."""
-    require_token(token, EMPLOYEE_TOKEN)
+    require_token(token, 'EMPLOYEE_TOKEN')
     db = get_db()
     db.execute("UPDATE task SET done_at=NULL WHERE id=? AND date(done_at)=?",
                (tid, today_iso()))
@@ -146,7 +149,7 @@ def employee_undo(token, tid):
 # ── Routes admin ──────────────────────────────────────────────────────────
 @app.route('/a/<token>/')
 def admin_view(token):
-    require_token(token, ADMIN_TOKEN)
+    require_token(token, 'ADMIN_TOKEN')
     generate_today_recurring()
     db = get_db()
     td = today_iso()
@@ -174,7 +177,7 @@ def admin_view(token):
 
 @app.route('/a/<token>/add', methods=['POST'])
 def admin_add(token):
-    require_token(token, ADMIN_TOKEN)
+    require_token(token, 'ADMIN_TOKEN')
     title = (request.form.get('title') or '').strip()
     due = (request.form.get('due_date') or '').strip() or None
     if not title:
@@ -188,7 +191,7 @@ def admin_add(token):
 
 @app.route('/a/<token>/del/<int:tid>', methods=['POST'])
 def admin_delete(token, tid):
-    require_token(token, ADMIN_TOKEN)
+    require_token(token, 'ADMIN_TOKEN')
     db = get_db()
     db.execute('DELETE FROM task WHERE id=?', (tid,))
     db.commit()
@@ -197,7 +200,7 @@ def admin_delete(token, tid):
 
 @app.route('/a/<token>/edit/<int:tid>', methods=['POST'])
 def admin_edit(token, tid):
-    require_token(token, ADMIN_TOKEN)
+    require_token(token, 'ADMIN_TOKEN')
     title = (request.form.get('title') or '').strip()
     due = (request.form.get('due_date') or '').strip() or None
     db = get_db()
@@ -208,7 +211,7 @@ def admin_edit(token, tid):
 
 @app.route('/a/<token>/recurring/add', methods=['POST'])
 def admin_add_recurring(token):
-    require_token(token, ADMIN_TOKEN)
+    require_token(token, 'ADMIN_TOKEN')
     title = (request.form.get('title') or '').strip()
     days = request.form.getlist('days')  # liste de '1'..'7'
     if not title or not days:
@@ -223,7 +226,7 @@ def admin_add_recurring(token):
 
 @app.route('/a/<token>/recurring/toggle/<int:rid>', methods=['POST'])
 def admin_toggle_recurring(token, rid):
-    require_token(token, ADMIN_TOKEN)
+    require_token(token, 'ADMIN_TOKEN')
     db = get_db()
     db.execute('UPDATE recurring SET active = 1 - active WHERE id=?', (rid,))
     db.commit()
@@ -232,7 +235,7 @@ def admin_toggle_recurring(token, rid):
 
 @app.route('/a/<token>/recurring/del/<int:rid>', methods=['POST'])
 def admin_delete_recurring(token, rid):
-    require_token(token, ADMIN_TOKEN)
+    require_token(token, 'ADMIN_TOKEN')
     db = get_db()
     db.execute('DELETE FROM recurring WHERE id=?', (rid,))
     db.commit()
@@ -241,7 +244,7 @@ def admin_delete_recurring(token, rid):
 
 @app.route('/a/<token>/calendar')
 def admin_calendar(token):
-    require_token(token, ADMIN_TOKEN)
+    require_token(token, 'ADMIN_TOKEN')
     db = get_db()
     # 6 semaines a partir de lundi de cette semaine
     today = date.today()
