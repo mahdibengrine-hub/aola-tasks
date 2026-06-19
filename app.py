@@ -334,6 +334,18 @@ def admin_clear_today(token):
     return redirect(url_for('admin_view', token=token))
 
 
+@app.route('/a/<token>/clear-overdue', methods=['POST'])
+def admin_clear_overdue(token):
+    """Supprime toutes les tâches en retard non-faites (due_date < today)."""
+    require_token(token, 'ADMIN_TOKEN')
+    db = get_db()
+    td = today_iso()
+    db.execute(
+        'DELETE FROM task WHERE due_date<? AND done_at IS NULL', (td,))
+    db.commit()
+    return redirect(url_for('admin_view', token=token))
+
+
 @app.route('/a/<token>/del/<int:tid>', methods=['POST'])
 def admin_delete(token, tid):
     require_token(token, 'ADMIN_TOKEN')
