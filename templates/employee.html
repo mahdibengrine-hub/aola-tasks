@@ -24,7 +24,7 @@
             {{ t.title }}
           </div>
           <div class="task-meta">
-            {% if t.is_waiting %}⏳ En retard depuis le {{ t.due_date }}
+            {% if t.is_waiting %}⏳ En retard depuis le {{ t.due_date|fr_date }}
             {% else %}⏳ À faire
             {% endif %}
             {% if t.recurring_id %} · récurrente{% endif %}

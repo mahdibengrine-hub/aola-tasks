@@ -1,66 +1,74 @@
-/* AOLA Tasks — design system mobile-first */
+/* AOLA Tasks — design system (teal palette) */
 :root{
-  --bg:#f5f0e6;
-  --ink:#1a1814;
-  --ink-soft:#3d362c;
-  --muted:#8a8273;
-  --gold:#c19a3f;
-  --gold-dark:#9a7320;
-  --gold-soft:#f5e8c8;
-  --green:#0f9d6a;
-  --red:#d23a5b;
+  --bg:#eefaf6;
+  --bg-warm:#f5fbf9;
+  --ink:#0a2e2a;
+  --ink-soft:#1f4540;
+  --muted:#6b8581;
+  --teal:#14b8a6;
+  --teal-dark:#0d9488;
+  --teal-deep:#0f766e;
+  --teal-soft:#ccfbf1;
+  --teal-pale:#e6fbf5;
+  --amber:#f59e0b;
+  --amber-soft:#fef3c7;
+  --amber-dark:#92400e;
+  --coral:#ef4444;
+  --coral-soft:#fee2e2;
+  --green:#10b981;
   --card:#ffffff;
-  --line:#e8e1d1;
-  --soft:#fbf6ec;
-  --shadow-sm:0 1px 2px rgba(28,22,12,.05);
-  --shadow:0 1px 3px rgba(28,22,12,.05), 0 8px 24px rgba(28,22,12,.05);
-  --shadow-lg:0 4px 12px rgba(28,22,12,.08), 0 20px 60px rgba(28,22,12,.12);
+  --line:#d0ebe5;
+  --line-soft:#e3f1ed;
+  --shadow-sm:0 1px 2px rgba(10,46,42,.05);
+  --shadow:0 1px 3px rgba(10,46,42,.06), 0 8px 24px rgba(10,46,42,.06);
+  --shadow-lg:0 4px 12px rgba(10,46,42,.08), 0 20px 60px rgba(10,46,42,.12);
 }
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;
   font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
 button,input,select,textarea{font:inherit;color:inherit}
-a{color:var(--gold);text-decoration:none}
+a{color:var(--teal-dark);text-decoration:none}
 
 .desktop-only{display:flex}
 .mobile-only{display:none}
 
-/* ── Topbar (desktop & mobile haut) ─────────────────── */
+/* ── Topbar ─────────────────────────────────────────── */
 .topbar{display:flex;align-items:center;justify-content:space-between;
   padding:18px 20px;background:#fff;
   border-bottom:1px solid var(--line);
   position:sticky;top:0;z-index:50}
 .brand{font-weight:700;font-size:17px;letter-spacing:.2px}
-.brand::before{content:"✦ ";color:var(--gold)}
+.brand::before{content:"✦ ";color:var(--teal-dark)}
 
 .topnav{display:flex;gap:4px}
 .topnav a{padding:8px 14px;border-radius:999px;color:var(--muted);
   font-size:14px;font-weight:500;display:flex;align-items:center;gap:6px;
   transition:all .15s}
-.topnav a.active{color:var(--ink);background:var(--soft)}
+.topnav a.active{color:var(--ink);background:var(--teal-pale)}
 .topnav a .ico{font-size:14px}
 
 main{max-width:760px;margin:0 auto;padding:20px 16px 80px}
 
-/* ── Bottom nav (mobile only) ───────────────────────── */
+/* ── Bottom nav (mobile) ────────────────────────────── */
 .bottomnav{position:fixed;bottom:0;left:0;right:0;
   display:none;background:#fff;
   border-top:1px solid var(--line);
   padding:8px 6px calc(8px + env(safe-area-inset-bottom));
-  z-index:60;box-shadow:0 -4px 16px rgba(28,22,12,.06)}
+  z-index:60;box-shadow:0 -4px 16px rgba(10,46,42,.06)}
 .bottomnav a{flex:1;display:flex;flex-direction:column;align-items:center;
-  gap:2px;padding:8px 4px;border-radius:14px;
+  gap:3px;padding:8px 4px;border-radius:14px;
   color:var(--muted);font-size:11px;font-weight:600;
-  transition:all .12s;text-align:center;line-height:1.15}
+  transition:all .12s;text-align:center;line-height:1.15;min-width:0}
 .bottomnav a .ico{font-size:22px;line-height:1}
-.bottomnav a .lbl{font-size:10.5px;letter-spacing:.2px}
-.bottomnav a.active{color:var(--ink);background:var(--gold-soft)}
+.bottomnav a .lbl{font-size:10.5px;letter-spacing:.2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.bottomnav a.active{color:var(--teal-deep);background:var(--teal-soft)}
 .bottomnav a:active{transform:scale(.93)}
 
 /* ── Hero ───────────────────────────────────────────── */
 .hero{padding:20px 4px 24px}
-.hero-date{color:var(--gold-dark);font-size:12px;font-weight:700;
+.hero-date{color:var(--teal-dark);font-size:12px;font-weight:700;
   text-transform:uppercase;letter-spacing:1.2px;margin-bottom:6px}
 .hero-title{font-size:28px;font-weight:700;letter-spacing:-.5px;line-height:1.15}
 
@@ -68,66 +76,72 @@ main{max-width:760px;margin:0 auto;padding:20px 16px 80px}
 .section-title{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;
   font-weight:700;color:var(--muted);margin:28px 4px 12px;
   display:flex;align-items:center;gap:8px}
-.section-title.danger{color:var(--red)}
+.section-title.danger{color:var(--coral)}
 
 /* ── Cards ──────────────────────────────────────────── */
 .card{background:var(--card);border:1px solid var(--line);border-radius:20px;
   padding:20px;margin-bottom:16px;box-shadow:var(--shadow)}
 .card-h{font-weight:700;margin-bottom:14px;font-size:15px;color:var(--ink-soft)}
 
+/* ── Field (label + input) ──────────────────────────── */
+.field{display:flex;flex-direction:column;gap:6px}
+.form-label{font-size:12px;font-weight:700;color:var(--teal-dark);
+  text-transform:uppercase;letter-spacing:.8px;padding-left:2px}
+
 /* ── Inputs ─────────────────────────────────────────── */
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-.col{display:flex;flex-direction:column;gap:12px}
+.col{display:flex;flex-direction:column;gap:14px}
 input[type=text], input[type=date], input:not([type]){
   padding:15px 16px;border:1.5px solid var(--line);border-radius:14px;
-  background:#fff;flex:1;min-width:140px;font-size:16px;
+  background:#fff;width:100%;min-width:0;font-size:16px;
   transition:border-color .15s, box-shadow .15s}
 input[type=text]:focus, input[type=date]:focus, input:not([type]):focus{
-  outline:none;border-color:var(--gold);
-  box-shadow:0 0 0 4px rgba(193,154,63,.12)}
+  outline:none;border-color:var(--teal);
+  box-shadow:0 0 0 4px rgba(20,184,166,.15)}
 
 /* ── Select ─────────────────────────────────────────── */
 select{padding:15px 16px;border:1.5px solid var(--line);border-radius:14px;
-  background:#fff;font-size:16px;font-weight:500;color:var(--ink);
+  background:#fff;width:100%;font-size:16px;font-weight:500;color:var(--ink);
   -webkit-appearance:none;appearance:none;
-  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path fill='%238a8273' d='M2 4l4 4 4-4'/></svg>");
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path fill='%236b8581' d='M2 4l4 4 4-4'/></svg>");
   background-repeat:no-repeat;background-position:right 14px center;padding-right:38px;
   cursor:pointer}
-select:focus{outline:none;border-color:var(--gold);
-  box-shadow:0 0 0 4px rgba(193,154,63,.12)}
+select:focus{outline:none;border-color:var(--teal);
+  box-shadow:0 0 0 4px rgba(20,184,166,.15)}
 select:required:invalid{color:var(--muted)}
-
-.form-label{font-size:12px;font-weight:700;color:var(--muted);
-  text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
 
 /* ── Buttons ────────────────────────────────────────── */
 button{cursor:pointer;border:none;border-radius:14px;
   padding:15px 22px;font-size:15px;font-weight:600;
   background:var(--ink);color:#fff;transition:transform .1s, opacity .15s, background .15s}
 button:active{transform:scale(.97)}
-.btn-primary{background:var(--gold);color:#1a1814;
-  box-shadow:0 4px 14px rgba(193,154,63,.35);font-weight:700}
-.btn-primary:hover{background:#b08d34}
+.btn-primary{background:var(--teal);color:#fff;
+  box-shadow:0 4px 14px rgba(20,184,166,.35);font-weight:700}
+.btn-primary:hover{background:var(--teal-dark)}
 .btn-ghost{background:#fff;color:var(--ink-soft);border:1.5px solid var(--line);padding:11px 16px;font-weight:600}
-.btn-ghost:hover{background:var(--soft)}
-.btn-danger{background:#fff;color:var(--red);border:1.5px solid #f5d4dc;padding:11px 16px;font-weight:600}
-.btn-danger:hover{background:#fde9ee}
+.btn-ghost:hover{background:var(--teal-pale)}
+.btn-danger{background:#fff;color:var(--coral);border:1.5px solid #fbcfd5;padding:11px 16px;font-weight:600}
+.btn-danger:hover{background:var(--coral-soft)}
+.btn-clear{background:var(--coral-soft);color:var(--coral);border:none;
+  padding:9px 14px;font-size:12px;font-weight:700;border-radius:10px;
+  text-transform:uppercase;letter-spacing:.4px}
+.btn-clear:hover{background:#fdd0d6}
 
-/* ── Day picker (recurring) ─────────────────────────── */
+/* ── Day picker ─────────────────────────────────────── */
 .daypicker{display:flex;gap:6px;flex-wrap:wrap}
 .daypicker label{padding:10px 14px;border:1.5px solid var(--line);border-radius:12px;
   font-size:13px;font-weight:600;cursor:pointer;background:#fff;
   user-select:none;transition:all .12s;min-width:48px;text-align:center}
-.daypicker label:has(input:checked){background:var(--ink);color:#fff;border-color:var(--ink)}
+.daypicker label:has(input:checked){background:var(--teal);color:#fff;border-color:var(--teal)}
 .daypicker input{display:none}
 
-/* ── Checkrow (case Tâche prioritaire) ──────────────── */
+/* ── Checkrow ───────────────────────────────────────── */
 .checkrow{display:flex;align-items:center;gap:12px;cursor:pointer;
-  padding:14px 16px;background:var(--soft);border-radius:14px;
+  padding:14px 16px;background:var(--bg-warm);border-radius:14px;
   font-size:15px;font-weight:600;user-select:none;
   border:1.5px solid transparent;transition:all .15s}
-.checkrow:has(input:checked){background:var(--gold-soft);border-color:var(--gold)}
-.checkrow input{width:22px;height:22px;accent-color:var(--gold);cursor:pointer}
+.checkrow:has(input:checked){background:var(--amber-soft);border-color:var(--amber)}
+.checkrow input{width:22px;height:22px;accent-color:var(--teal);cursor:pointer}
 
 /* ── Tasks list ─────────────────────────────────────── */
 .tasks{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px}
@@ -135,31 +149,31 @@ button:active{transform:scale(.97)}
   background:var(--card);border:1px solid var(--line);border-radius:18px;
   padding:16px;box-shadow:var(--shadow-sm);transition:transform .1s}
 .task.muted{opacity:.5}
-.task.priority{border-left:4px solid var(--gold);background:linear-gradient(90deg, #fffbf0 0%, #fff 60%)}
-.task.late{border-left:4px solid var(--red);background:linear-gradient(90deg, #fff5f7 0%, #fff 60%)}
+.task.priority{border-left:4px solid var(--amber);background:linear-gradient(90deg, #fffaeb 0%, #fff 60%)}
+.task.late{border-left:4px solid var(--coral);background:linear-gradient(90deg, #fff5f5 0%, #fff 60%)}
 .task-body{flex:1;min-width:0}
 .task-title{font-weight:600;font-size:16px;word-break:break-word;line-height:1.35}
 .task-title.strike{text-decoration:line-through;color:var(--muted);font-weight:500}
 .task-meta{font-size:13px;color:var(--muted);margin-top:5px}
 .task-note{font-size:13px;color:var(--muted);font-style:italic;margin-top:10px;
-  padding:10px 12px;background:var(--soft);border-radius:10px}
+  padding:10px 12px;background:var(--teal-pale);border-radius:10px}
 .task-actions{display:flex;gap:6px;align-items:center}
 
 /* ── Badges ─────────────────────────────────────────── */
 .badge{display:inline-block;font-size:11px;font-weight:700;
-  background:var(--soft);color:var(--gold-dark);
+  background:var(--teal-pale);color:var(--teal-deep);
   border-radius:999px;padding:3px 9px;margin-right:6px;
   text-transform:uppercase;letter-spacing:.5px;vertical-align:middle}
-.badge-priority{background:#fff4d6;color:var(--gold-dark)}
-.badge-late{background:#fde9ee;color:var(--red)}
+.badge-priority{background:var(--amber-soft);color:var(--amber-dark)}
+.badge-late{background:var(--coral-soft);color:var(--coral)}
 
 /* ── Check button (employee) ────────────────────────── */
-.check{width:52px;height:52px;border-radius:14px;background:var(--soft);
+.check{width:52px;height:52px;border-radius:14px;background:var(--bg-warm);
   border:2px solid var(--line);color:var(--ink);font-size:24px;
   display:flex;align-items:center;justify-content:center;padding:0;
-  flex-shrink:0;font-weight:600;width:52px}
-.check:hover{background:var(--gold-soft);border-color:var(--gold)}
-.check.checked{background:#e6f7ee;border-color:#9ee0bc;color:var(--green)}
+  flex-shrink:0;font-weight:600}
+.check:hover{background:var(--teal-soft);border-color:var(--teal)}
+.check.checked{background:#d1fae5;border-color:#a7f3d0;color:var(--green)}
 
 details summary{cursor:pointer;list-style:none;padding:2px 0}
 details summary::-webkit-details-marker{display:none}
@@ -175,20 +189,20 @@ details[open] summary{margin-bottom:8px}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}
 .stat{background:var(--card);border:1px solid var(--line);border-radius:18px;
   padding:18px 12px;text-align:center;box-shadow:var(--shadow-sm)}
-.stat.highlight{background:linear-gradient(135deg, var(--gold) 0%, #d4ae5a 100%);
-  color:#1a1814;border-color:transparent;box-shadow:var(--shadow)}
+.stat.highlight{background:linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
+  color:#fff;border-color:transparent;box-shadow:var(--shadow)}
 .stat-value{font-size:30px;font-weight:800;line-height:1;margin-bottom:6px}
 .stat-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;opacity:.7}
-.stat.highlight .stat-label{opacity:.85}
+.stat.highlight .stat-label{opacity:.9}
 
-.progress{height:12px;background:var(--soft);border-radius:999px;overflow:hidden;
+.progress{height:12px;background:var(--teal-pale);border-radius:999px;overflow:hidden;
   margin-bottom:20px;border:1px solid var(--line)}
-.progress-bar{height:100%;background:linear-gradient(90deg, var(--gold), #d4ae5a);
+.progress-bar{height:100%;background:linear-gradient(90deg, var(--teal), var(--teal-dark));
   border-radius:999px;transition:width .4s ease}
 
-/* ── Day blocks (calendrier liste 3 jours) ───────────── */
+/* ── Day blocks (calendrier 3 jours) ─────────────────── */
 .day-block{margin-bottom:24px}
-.day-block.today .day-head{color:var(--gold-dark)}
+.day-block.today .day-head{color:var(--teal-dark)}
 .day-head{display:flex;justify-content:space-between;align-items:baseline;
   padding:6px 4px 12px;border-bottom:1.5px solid var(--line);margin-bottom:12px}
 .day-name{font-size:18px;font-weight:700;text-transform:capitalize}
@@ -196,7 +210,7 @@ details[open] summary{margin-bottom:8px}
   text-transform:uppercase;letter-spacing:.8px}
 
 /* ════════════════════════════════════════════════════════
-   MOBILE (≤ 640px)
+   MOBILE
    ════════════════════════════════════════════════════════ */
 @media (max-width:640px){
   .desktop-only{display:none !important}
@@ -204,10 +218,9 @@ details[open] summary{margin-bottom:8px}
 
   .topbar{padding:14px 16px}
   .brand{font-size:16px}
-
   .bottomnav{display:flex}
 
-  main{padding:16px 14px 100px}
+  main{padding:16px 14px 110px}
 
   .hero{padding:12px 2px 18px}
   .hero-title{font-size:24px}
@@ -217,11 +230,18 @@ details[open] summary{margin-bottom:8px}
   .task{padding:14px;border-radius:16px}
   .row{flex-direction:column;align-items:stretch}
 
+  /* inputs : full width, taille uniforme */
   input[type=text], input[type=date], input:not([type]), select{
-    width:100%;font-size:16px;padding:16px}
+    width:100%;font-size:16px;padding:15px 14px;min-width:0;max-width:100%;
+    -webkit-appearance:none;appearance:none}
+  /* iOS Safari hack: ensure date picker doesn't overflow */
+  input[type=date]{
+    display:block;-webkit-min-logical-width:calc(100% - 16px);
+    text-align:left}
 
   button{width:100%;padding:16px 20px;font-size:16px}
   .btn-ghost, .btn-danger{padding:12px 18px;font-size:14px}
+  .btn-clear{width:auto;padding:8px 12px;font-size:11px}
 
   .task-actions{flex-direction:column;align-items:stretch}
   .task-actions button{width:auto}
@@ -235,5 +255,4 @@ details[open] summary{margin-bottom:8px}
   .daypicker label{padding:9px 11px;font-size:13px;min-width:44px}
 }
 
-/* tiny touch */
-::selection{background:var(--gold-soft);color:var(--ink)}
+::selection{background:var(--teal-soft);color:var(--ink)}

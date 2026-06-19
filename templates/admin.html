@@ -11,11 +11,18 @@
 <div class="card">
   <div class="card-h">➕ Nouvelle tâche</div>
   <form method="POST" action="{{ url_for('admin_add', token=token) }}" class="col">
-    <input name="title" placeholder="Titre de la tâche…" required>
-    <div class="row">
-      <input type="date" name="due_date" required min="{{ today }}" style="flex:1">
-      <select name="location" required style="flex:1">
-        <option value="" disabled selected>— Lieu —</option>
+    <div class="field">
+      <div class="form-label">Titre</div>
+      <input name="title" placeholder="Ex. Aller chez Yalidine" required>
+    </div>
+    <div class="field">
+      <div class="form-label">Date</div>
+      <input type="date" name="due_date" required min="{{ today }}">
+    </div>
+    <div class="field">
+      <div class="form-label">Lieu</div>
+      <select name="location" required>
+        <option value="" disabled selected>— Choisis un lieu —</option>
         {% for loc in locations %}
         <option value="{{ loc }}">{{ loc }}</option>
         {% endfor %}
@@ -36,7 +43,16 @@
 </ul>
 {% endif %}
 
-<h2 class="section-title">Aujourd'hui ({{ today_tasks|length }})</h2>
+<div class="row" style="justify-content:space-between;align-items:center;margin:28px 4px 12px">
+  <h2 class="section-title" style="margin:0">Aujourd'hui ({{ today_tasks|length }})</h2>
+  {% if today_tasks %}
+  <form method="POST" action="{{ url_for('admin_clear_today', token=token) }}"
+        onsubmit="return confirm('Supprimer TOUTES les tâches du jour (récurrentes incluses) ?');"
+        style="margin:0">
+    <button type="submit" class="btn-clear">🗑 Vider la journée</button>
+  </form>
+  {% endif %}
+</div>
 {% if today_tasks %}
 <ul class="tasks">
   {% for t in today_tasks %}{% include "_admin_task.html" %}{% endfor %}

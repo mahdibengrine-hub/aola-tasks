@@ -6,7 +6,7 @@
         <span class="task-title">{{ t.title }}</span>
         <div class="task-meta">
           {% if t.location %}📍 {{ t.location }}{% endif %}
-          {% if t.due_date %}{% if t.location %} · {% endif %}{{ t.due_date }}{% endif %}
+          {% if t.due_date %}{% if t.location %} · {% endif %}{{ t.due_date|fr_date }}{% endif %}
           {% if t.recurring_id %} · récurrente{% endif %}
         </div>
       </summary>

@@ -43,6 +43,18 @@ def fr_short_y(d):
     return f"{d.day} {FR_MONTHS[d.month-1]} {d.year}"
 
 
+@app.template_filter('fr_date')
+def _fr_date_filter(iso_str):
+    """Convertit '2026-06-19' en '19 juin 2026'. Robuste a tout cas."""
+    if not iso_str:
+        return ''
+    try:
+        d = date.fromisoformat(str(iso_str)[:10])
+        return f"{d.day} {FR_MONTHS[d.month-1]} {d.year}"
+    except Exception:
+        return str(iso_str)
+
+
 # ── DB ────────────────────────────────────────────────────────────────────
 def get_db():
     if 'db' not in g:
@@ -305,6 +317,19 @@ def admin_add(token):
         'INSERT INTO task(title, due_date, priority, location, created_at) '
         'VALUES (?,?,?,?,?)',
         (title, due, priority, location, now_iso()))
+    db.commit()
+    return redirect(url_for('admin_view', token=token))
+
+
+@app.route('/a/<token>/clear-today', methods=['POST'])
+def admin_clear_today(token):
+    """Supprime toutes les tâches du jour, qu'elles soient récurrentes ou ad-hoc.
+    Concerne uniquement les tâches non-encore-faites pour le jour courant."""
+    require_token(token, 'ADMIN_TOKEN')
+    db = get_db()
+    td = today_iso()
+    db.execute(
+        'DELETE FROM task WHERE due_date=? AND done_at IS NULL', (td,))
     db.commit()
     return redirect(url_for('admin_view', token=token))
 

@@ -60,7 +60,7 @@
       </div>
       <div class="task-meta">
         {% if t.location %}📍 {{ t.location }}{% endif %}
-        {% if t.due_date %}{% if t.location %} · {% endif %}{{ t.due_date }}{% endif %}
+        {% if t.due_date %}{% if t.location %} · {% endif %}{{ t.due_date|fr_date }}{% endif %}
       </div>
     </div>
   </li>
