@@ -37,29 +37,13 @@
 </div>
 
 {% if overdue %}
-<div class="row" style="justify-content:space-between;align-items:center;margin:28px 4px 12px">
-  <h2 class="section-title danger" style="margin:0">⚠ En retard ({{ overdue|length }})</h2>
-  <form method="POST" action="{{ url_for('admin_clear_overdue', token=token) }}"
-        onsubmit="return confirm('Supprimer toutes les tâches en retard ?');"
-        style="margin:0">
-    <button type="submit" class="btn-clear">🗑 Vider les retards</button>
-  </form>
-</div>
+<h2 class="section-title danger">⚠ En retard ({{ overdue|length }})</h2>
 <ul class="tasks">
   {% for t in overdue %}{% include "_admin_task.html" %}{% endfor %}
 </ul>
 {% endif %}
 
-<div class="row" style="justify-content:space-between;align-items:center;margin:28px 4px 12px">
-  <h2 class="section-title" style="margin:0">Aujourd'hui ({{ today_tasks|length }})</h2>
-  {% if today_tasks %}
-  <form method="POST" action="{{ url_for('admin_clear_today', token=token) }}"
-        onsubmit="return confirm('Supprimer TOUTES les tâches du jour (récurrentes incluses) ?');"
-        style="margin:0">
-    <button type="submit" class="btn-clear">🗑 Vider la journée</button>
-  </form>
-  {% endif %}
-</div>
+<h2 class="section-title">Aujourd'hui ({{ today_tasks|length }})</h2>
 {% if today_tasks %}
 <ul class="tasks">
   {% for t in today_tasks %}{% include "_admin_task.html" %}{% endfor %}

@@ -27,23 +27,23 @@
   <div class="progress-bar" style="width:{{ pct_done }}%"></div>
 </div>
 
-<h2 class="section-title">✅ Faites aujourd'hui ({{ done_today|length }})</h2>
-{% if done_today %}
-<ul class="tasks done">
-  {% for t in done_today %}
-  <li class="task">
-    <div class="check checked" aria-hidden="true">✅</div>
-    <div class="task-body">
-      <div class="task-title strike">{{ t.title }}</div>
-      <div class="task-meta">
-        {% if t.location %}📍 {{ t.location }} · {% endif %}fait à {{ t.done_at[11:16] }}
-      </div>
-    </div>
-  </li>
-  {% endfor %}
-</ul>
-{% else %}
-<div class="empty soft">Liste vide.</div>
+{% if has_overdue or has_today %}
+<div class="row" style="gap:8px;margin-bottom:20px">
+  {% if has_overdue %}
+  <form method="POST" action="{{ url_for('admin_clear_overdue', token=token) }}"
+        onsubmit="return confirm('Supprimer toutes les tâches en retard ?');"
+        style="flex:1">
+    <button type="submit" class="btn-clear" style="width:100%">🗑 Vider les retards</button>
+  </form>
+  {% endif %}
+  {% if has_today %}
+  <form method="POST" action="{{ url_for('admin_clear_today', token=token) }}"
+        onsubmit="return confirm('Supprimer TOUTES les tâches du jour (récurrentes incluses) ?');"
+        style="flex:1">
+    <button type="submit" class="btn-clear" style="width:100%">🗑 Vider la journée</button>
+  </form>
+  {% endif %}
+</div>
 {% endif %}
 
 <h2 class="section-title">⏳ Encore à faire ({{ open_today|length }})</h2>
@@ -67,6 +67,59 @@
   {% endfor %}
 </ul>
 {% else %}
-<div class="empty">Liste vide.</div>
+<div class="empty">🎉 Toutes les tâches du jour sont faites.</div>
+{% endif %}
+
+<h2 class="section-title">✅ Faites aujourd'hui ({{ done_today|length }})</h2>
+{% if done_today %}
+<ul class="tasks done">
+  {% for t in done_today %}
+  <li class="task">
+    <div class="check checked" aria-hidden="true">✅</div>
+    <div class="task-body">
+      <div class="task-title strike">{{ t.title }}</div>
+      <div class="task-meta">
+        {% if t.location %}📍 {{ t.location }} · {% endif %}fait à {{ t.done_at[11:16] }}
+      </div>
+    </div>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<div class="empty soft">Rien de coché pour l'instant.</div>
+{% endif %}
+
+{% if done_yesterday %}
+<h2 class="section-title">{{ yesterday_label }} ({{ done_yesterday|length }})</h2>
+<ul class="tasks done">
+  {% for t in done_yesterday %}
+  <li class="task">
+    <div class="check checked" aria-hidden="true">✅</div>
+    <div class="task-body">
+      <div class="task-title strike">{{ t.title }}</div>
+      <div class="task-meta">
+        {% if t.location %}📍 {{ t.location }} · {% endif %}fait à {{ t.done_at[11:16] }}
+      </div>
+    </div>
+  </li>
+  {% endfor %}
+</ul>
+{% endif %}
+
+{% if done_day_before %}
+<h2 class="section-title">{{ day_before_label }} ({{ done_day_before|length }})</h2>
+<ul class="tasks done">
+  {% for t in done_day_before %}
+  <li class="task">
+    <div class="check checked" aria-hidden="true">✅</div>
+    <div class="task-body">
+      <div class="task-title strike">{{ t.title }}</div>
+      <div class="task-meta">
+        {% if t.location %}📍 {{ t.location }} · {% endif %}fait à {{ t.done_at[11:16] }}
+      </div>
+    </div>
+  </li>
+  {% endfor %}
+</ul>
 {% endif %}
 {% endblock %}

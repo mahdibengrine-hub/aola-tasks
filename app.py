@@ -139,9 +139,21 @@ def require_token(token, env_key):
         abort(404)
 
 
+def purge_old_history():
+    """Supprime les taches faites il y a plus de 2 jours pour alleger la DB.
+    Hier et avant-hier sont conserves (utilises dans Suivi)."""
+    db = get_db()
+    cutoff = (date.today() - timedelta(days=2)).isoformat()
+    db.execute(
+        "DELETE FROM task WHERE done_at IS NOT NULL AND date(done_at) < ?",
+        (cutoff,))
+    db.commit()
+
+
 def generate_today_recurring():
     """Crée les tâches du jour à partir des récurrentes actives,
     sauf si elles sont marquées 'skip' pour ce jour."""
+    purge_old_history()
     db = get_db()
     td = today_iso()
     weekday = str(date.today().isoweekday())
@@ -493,29 +505,51 @@ def admin_calendar(token):
 def admin_follow(token):
     require_token(token, 'ADMIN_TOKEN')
     db = get_db()
-    td = today_iso()
-    open_today = db.execute(
+    today = date.today()
+    td = today.isoformat()
+    yesterday  = today - timedelta(days=1)
+    day_before = today - timedelta(days=2)
+
+    has_overdue = bool(db.execute(
+        'SELECT 1 FROM task WHERE done_at IS NULL AND due_date<? LIMIT 1',
+        (td,)).fetchone())
+
+    open_today_rows = db.execute(
         'SELECT * FROM task WHERE done_at IS NULL AND (due_date<=? OR due_date IS NULL) '
         'ORDER BY priority DESC, due_date ASC, id ASC', (td,)).fetchall()
     open_view = []
-    for t in open_today:
+    for t in open_today_rows:
         d = dict(t)
         d['is_waiting']  = bool(t['due_date'] and t['due_date'] < td)
         d['is_priority'] = bool(t['priority'])
         open_view.append(d)
+
     done_today = db.execute(
         "SELECT * FROM task WHERE date(done_at)=? ORDER BY done_at ASC",
         (td,)).fetchall()
-    total = len(open_today) + len(done_today)
+    done_yesterday = db.execute(
+        "SELECT * FROM task WHERE date(done_at)=? ORDER BY done_at ASC",
+        (yesterday.isoformat(),)).fetchall()
+    done_day_before = db.execute(
+        "SELECT * FROM task WHERE date(done_at)=? ORDER BY done_at ASC",
+        (day_before.isoformat(),)).fetchall()
+
+    total = len(open_today_rows) + len(done_today)
     pct_done = round(100 * len(done_today) / total) if total else 0
     return render_template('follow.html',
                            open_today=open_view,
                            done_today=done_today,
+                           done_yesterday=done_yesterday,
+                           done_day_before=done_day_before,
+                           yesterday_label=fr_long(yesterday).capitalize(),
+                           day_before_label=fr_long(day_before).capitalize(),
                            total=total,
                            pct_done=pct_done,
+                           has_overdue=has_overdue,
+                           has_today=bool(open_today_rows),
                            token=token,
                            today=td,
-                           today_label=fr_long(date.today()))
+                           today_label=fr_long(today).capitalize())
 
 
 # ── Landing ───────────────────────────────────────────────────────────────
