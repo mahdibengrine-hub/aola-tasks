@@ -110,6 +110,12 @@ def init_db():
         db.execute('ALTER TABLE task ADD COLUMN priority INTEGER NOT NULL DEFAULT 0')
     if 'location' not in task_cols:
         db.execute('ALTER TABLE task ADD COLUMN location TEXT')
+    if 'original_due_date' not in task_cols:
+        db.execute('ALTER TABLE task ADD COLUMN original_due_date TEXT')
+        # Pour les taches existantes : on recupere due_date comme original
+        db.execute(
+            'UPDATE task SET original_due_date = due_date '
+            'WHERE original_due_date IS NULL AND due_date IS NOT NULL')
 
     rec_cols = colset('recurring')
     if 'priority' not in rec_cols:
@@ -171,9 +177,9 @@ def generate_today_recurring():
         if exists:
             continue
         db.execute(
-            'INSERT INTO task(title, due_date, recurring_id, gen_date, '
-            'priority, location, created_at) VALUES (?,?,?,?,?,?,?)',
-            (r['title'], td, r['id'], td,
+            'INSERT INTO task(title, due_date, original_due_date, recurring_id, gen_date, '
+            'priority, location, created_at) VALUES (?,?,?,?,?,?,?,?)',
+            (r['title'], td, td, r['id'], td,
              r['priority'] or 0, r['location'], now_iso()))
     db.commit()
 
@@ -182,6 +188,21 @@ def normalize_location(loc):
     if loc in LOCATIONS:
         return loc
     return None
+
+
+def compute_delay_days(t):
+    """Renvoie le nombre de jours de retard depuis original_due_date jusqu'a aujourd'hui.
+    0 si pas de retard ou pas de date d'origine."""
+    orig = t['original_due_date'] if 'original_due_date' in t.keys() else None
+    orig = orig or t['due_date']
+    if not orig:
+        return 0
+    try:
+        o = date.fromisoformat(str(orig)[:10])
+        delta = (date.today() - o).days
+        return delta if delta > 0 else 0
+    except Exception:
+        return 0
 
 
 def group_by_location(tasks):
@@ -216,6 +237,7 @@ def employee_view(token):
         d = dict(t)
         d['is_waiting']  = bool(t['due_date'] and t['due_date'] < td)
         d['is_priority'] = bool(t['priority'])
+        d['delay_days']  = compute_delay_days(t)
         tasks.append(d)
     # priorité d'abord, en attente, puis le reste — tri stable
     tasks.sort(key=lambda t: (not t['is_priority'], not t['is_waiting']))
@@ -289,21 +311,34 @@ def _next_days(n_days):
 
 
 # ── Routes admin ──────────────────────────────────────────────────────────
+def _enrich(rows):
+    """Convertit des sqlite Rows en dicts avec is_waiting/is_priority/delay_days."""
+    td = today_iso()
+    out = []
+    for t in rows:
+        d = dict(t)
+        d['is_waiting']  = bool(t['due_date'] and t['due_date'] < td)
+        d['is_priority'] = bool(t['priority'])
+        d['delay_days']  = compute_delay_days(t)
+        out.append(d)
+    return out
+
+
 @app.route('/a/<token>/')
 def admin_view(token):
     require_token(token, 'ADMIN_TOKEN')
     generate_today_recurring()
     db = get_db()
     td = today_iso()
-    overdue = db.execute(
+    overdue = _enrich(db.execute(
         'SELECT * FROM task WHERE done_at IS NULL AND due_date<? '
-        'ORDER BY priority DESC, due_date ASC', (td,)).fetchall()
-    today_tasks = db.execute(
+        'ORDER BY priority DESC, due_date ASC', (td,)).fetchall())
+    today_tasks = _enrich(db.execute(
         'SELECT * FROM task WHERE done_at IS NULL AND due_date=? '
-        'ORDER BY priority DESC, id ASC', (td,)).fetchall()
-    upcoming = db.execute(
+        'ORDER BY priority DESC, id ASC', (td,)).fetchall())
+    upcoming = _enrich(db.execute(
         'SELECT * FROM task WHERE done_at IS NULL AND due_date>? '
-        'ORDER BY due_date ASC LIMIT 50', (td,)).fetchall()
+        'ORDER BY due_date ASC LIMIT 50', (td,)).fetchall())
     return render_template('admin.html',
                            overdue=overdue,
                            today_tasks=today_tasks,
@@ -326,11 +361,31 @@ def admin_add(token):
         return redirect(url_for('admin_view', token=token))
     db = get_db()
     db.execute(
-        'INSERT INTO task(title, due_date, priority, location, created_at) '
-        'VALUES (?,?,?,?,?)',
-        (title, due, priority, location, now_iso()))
+        'INSERT INTO task(title, due_date, original_due_date, priority, location, created_at) '
+        'VALUES (?,?,?,?,?,?)',
+        (title, due, due, priority, location, now_iso()))
     db.commit()
     return redirect(url_for('admin_view', token=token))
+
+
+@app.route('/a/<token>/postpone/<int:tid>', methods=['POST'])
+def admin_postpone(token, tid):
+    """Reporte une tache a une nouvelle date sans toucher original_due_date.
+    Permet d'afficher 'X jours de retard' meme apres report."""
+    require_token(token, 'ADMIN_TOKEN')
+    new_date = (request.form.get('new_date') or '').strip()
+    if not new_date:
+        return redirect(request.referrer or url_for('admin_view', token=token))
+    db = get_db()
+    # On garde original_due_date intact ; on met juste a jour due_date.
+    # S'il n'y a pas d'original (anciennes taches), on le met = ancien due_date.
+    db.execute(
+        'UPDATE task SET '
+        '  original_due_date = COALESCE(original_due_date, due_date), '
+        '  due_date = ? '
+        'WHERE id=?', (new_date, tid))
+    db.commit()
+    return redirect(request.referrer or url_for('admin_view', token=token))
 
 
 @app.route('/a/<token>/clear-today', methods=['POST'])
@@ -522,6 +577,7 @@ def admin_follow(token):
         d = dict(t)
         d['is_waiting']  = bool(t['due_date'] and t['due_date'] < td)
         d['is_priority'] = bool(t['priority'])
+        d['delay_days']  = compute_delay_days(t)
         open_view.append(d)
 
     done_today = db.execute(

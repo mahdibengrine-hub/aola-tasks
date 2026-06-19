@@ -55,7 +55,7 @@
     <div class="task-body">
       <div class="task-title">
         {% if t.is_priority %}<span class="badge badge-priority">⭐ Prioritaire</span>{% endif %}
-        {% if t.is_waiting %}<span class="badge badge-late">🔴 En attente</span>{% endif %}
+        {% if t.delay_days and t.delay_days > 0 %}<span class="badge badge-late">🔴 {{ t.delay_days }}j de retard</span>{% endif %}
         {{ t.title }}
       </div>
       <div class="task-meta">

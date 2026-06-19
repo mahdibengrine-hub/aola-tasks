@@ -1,8 +1,9 @@
-<li class="task{% if t.priority %} priority{% endif %}">
+<li class="task{% if t.priority %} priority{% endif %}{% if t.is_waiting %} late{% endif %}">
   <div class="task-body">
     <details>
       <summary>
         {% if t.priority %}<span class="badge badge-priority">⭐</span>{% endif %}
+        {% if t.delay_days and t.delay_days > 0 %}<span class="badge badge-late">🔴 {{ t.delay_days }}j de retard</span>{% endif %}
         <span class="task-title">{{ t.title }}</span>
         <div class="task-meta">
           {% if t.location %}📍 {{ t.location }}{% endif %}
@@ -10,6 +11,7 @@
           {% if t.recurring_id %} · récurrente{% endif %}
         </div>
       </summary>
+
       {% if not t.recurring_id %}
       <form method="POST" action="{{ url_for('admin_edit', token=token, tid=t.id) }}" class="col" style="margin-top:12px">
         <input name="title" value="{{ t.title }}" required>
@@ -31,6 +33,11 @@
       {% else %}
       <div class="task-note">Tâche issue d'une récurrente. Modifie-la depuis l'onglet <strong>T.Récurrentes</strong>.</div>
       {% endif %}
+
+      <form method="POST" action="{{ url_for('admin_postpone', token=token, tid=t.id) }}" class="row" style="margin-top:12px;gap:6px;align-items:center">
+        <input type="date" name="new_date" required min="{{ today }}" style="flex:1">
+        <button type="submit" class="btn-ghost">📅 Reporter</button>
+      </form>
     </details>
   </div>
   {% if not t.recurring_id %}
