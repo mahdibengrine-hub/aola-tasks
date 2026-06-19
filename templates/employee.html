@@ -1,9 +1,7 @@
 {% extends "base.html" %}
 {% block title %} — Aujourd'hui{% endblock %}
-{% block nav %}
-<a href="{{ url_for('employee_view', token=token) }}" class="active">Aujourd'hui</a>
-<a href="{{ url_for('employee_calendar', token=token) }}">Calendrier</a>
-{% endblock %}
+{% block topnav %}{% include '_nav_employee.html' %}{% endblock %}
+{% block bottomnav %}{% include '_nav_employee.html' %}{% endblock %}
 {% block content %}
 <section class="hero">
   <div class="hero-date">{{ today_label }}</div>
@@ -37,7 +35,7 @@
     </ul>
   {% endfor %}
 {% else %}
-<div class="empty">🎉 Tout est fait. Bonne journée !</div>
+<div class="empty">Liste vide.</div>
 {% endif %}
 
 {% if done_today %}

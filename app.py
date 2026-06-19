@@ -298,7 +298,7 @@ def admin_add(token):
     due      = (request.form.get('due_date') or '').strip()
     priority = 1 if request.form.get('priority') else 0
     location = normalize_location(request.form.get('location'))
-    if not title or not due:
+    if not title or not due or not location:
         return redirect(url_for('admin_view', token=token))
     db = get_db()
     db.execute(
@@ -325,6 +325,8 @@ def admin_edit(token, tid):
     due      = (request.form.get('due_date') or '').strip() or None
     priority = 1 if request.form.get('priority') else 0
     location = normalize_location(request.form.get('location'))
+    if not title or not due or not location:
+        return redirect(request.referrer or url_for('admin_view', token=token))
     db = get_db()
     db.execute(
         'UPDATE task SET title=?, due_date=?, priority=?, location=? WHERE id=?',
@@ -360,7 +362,7 @@ def admin_recurring_add(token):
     days     = request.form.getlist('days')
     priority = 1 if request.form.get('priority') else 0
     location = normalize_location(request.form.get('location'))
-    if not title or not days:
+    if not title or not days or not location:
         return redirect(url_for('admin_recurring', token=token))
     days_mask = ','.join(sorted(set(days)))
     db = get_db()
@@ -379,7 +381,7 @@ def admin_recurring_edit(token, rid):
     days     = request.form.getlist('days')
     priority = 1 if request.form.get('priority') else 0
     location = normalize_location(request.form.get('location'))
-    if not title or not days:
+    if not title or not days or not location:
         return redirect(url_for('admin_recurring', token=token))
     days_mask = ','.join(sorted(set(days)))
     db = get_db()

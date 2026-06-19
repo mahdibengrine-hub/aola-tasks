@@ -10,12 +10,13 @@
           {% if t.recurring_id %} · récurrente{% endif %}
         </div>
       </summary>
+      {% if not t.recurring_id %}
       <form method="POST" action="{{ url_for('admin_edit', token=token, tid=t.id) }}" class="col" style="margin-top:12px">
         <input name="title" value="{{ t.title }}" required>
         <div class="row">
-          <input type="date" name="due_date" value="{{ t.due_date or '' }}" style="flex:1">
-          <select name="location" style="flex:1">
-            <option value="">— Lieu —</option>
+          <input type="date" name="due_date" value="{{ t.due_date or '' }}" required style="flex:1">
+          <select name="location" required style="flex:1">
+            <option value="" disabled>— Lieu —</option>
             {% for loc in locations %}
             <option value="{{ loc }}" {% if t.location == loc %}selected{% endif %}>{{ loc }}</option>
             {% endfor %}
@@ -23,15 +24,20 @@
         </div>
         <label class="checkrow">
           <input type="checkbox" name="priority" value="1" {% if t.priority %}checked{% endif %}>
-          <span>⭐ Prioritaire</span>
+          <span>⭐ Tâche prioritaire&nbsp;?</span>
         </label>
         <button type="submit" class="btn-ghost">Enregistrer</button>
       </form>
+      {% else %}
+      <div class="task-note">Tâche issue d'une récurrente. Modifie-la depuis l'onglet <strong>T.Récurrentes</strong>.</div>
+      {% endif %}
     </details>
   </div>
+  {% if not t.recurring_id %}
   <div class="task-actions">
     <form method="POST" action="{{ url_for('admin_delete', token=token, tid=t.id) }}" onsubmit="return confirm('Supprimer cette tâche ?')" style="display:inline">
       <button type="submit" class="btn-danger">Suppr</button>
     </form>
   </div>
+  {% endif %}
 </li>

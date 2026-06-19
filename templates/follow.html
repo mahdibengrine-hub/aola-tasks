@@ -1,11 +1,7 @@
 {% extends "base.html" %}
 {% block title %} — Suivi{% endblock %}
-{% block nav %}
-<a href="{{ url_for('admin_view', token=token) }}">Tableau</a>
-<a href="{{ url_for('admin_calendar', token=token) }}">Calendrier</a>
-<a href="{{ url_for('admin_recurring', token=token) }}">Récurrentes</a>
-<a href="{{ url_for('admin_follow', token=token) }}" class="active">Suivi</a>
-{% endblock %}
+{% block topnav %}{% include '_nav_admin.html' %}{% endblock %}
+{% block bottomnav %}{% include '_nav_admin.html' %}{% endblock %}
 {% block content %}
 <section class="hero">
   <div class="hero-date">{{ today_label }}</div>
@@ -47,7 +43,7 @@
   {% endfor %}
 </ul>
 {% else %}
-<div class="empty soft">Aucune tâche cochée pour l'instant.</div>
+<div class="empty soft">Liste vide.</div>
 {% endif %}
 
 <h2 class="section-title">⏳ Encore à faire ({{ open_today|length }})</h2>
@@ -71,6 +67,6 @@
   {% endfor %}
 </ul>
 {% else %}
-<div class="empty">🎉 Toutes les tâches du jour sont faites — il a du temps libre.</div>
+<div class="empty">Liste vide.</div>
 {% endif %}
 {% endblock %}

@@ -1,17 +1,20 @@
-/* AOLA Tasks — design mobile-first, epure */
+/* AOLA Tasks — design system mobile-first */
 :root{
-  --bg:#f6f2ea;
+  --bg:#f5f0e6;
   --ink:#1a1814;
-  --ink-soft:#4a4439;
+  --ink-soft:#3d362c;
   --muted:#8a8273;
   --gold:#c19a3f;
-  --gold-soft:#e8d8a8;
+  --gold-dark:#9a7320;
+  --gold-soft:#f5e8c8;
   --green:#0f9d6a;
   --red:#d23a5b;
   --card:#ffffff;
   --line:#e8e1d1;
-  --soft:#faf6ec;
-  --shadow:0 1px 2px rgba(28,22,12,.04), 0 8px 24px rgba(28,22,12,.05);
+  --soft:#fbf6ec;
+  --shadow-sm:0 1px 2px rgba(28,22,12,.05);
+  --shadow:0 1px 3px rgba(28,22,12,.05), 0 8px 24px rgba(28,22,12,.05);
+  --shadow-lg:0 4px 12px rgba(28,22,12,.08), 0 20px 60px rgba(28,22,12,.12);
 }
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
@@ -20,23 +23,44 @@ html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
 button,input,select,textarea{font:inherit;color:inherit}
 a{color:var(--gold);text-decoration:none}
 
-/* ── Topbar ─────────────────────────────────────────── */
+.desktop-only{display:flex}
+.mobile-only{display:none}
+
+/* ── Topbar (desktop & mobile haut) ─────────────────── */
 .topbar{display:flex;align-items:center;justify-content:space-between;
   padding:18px 20px;background:#fff;
   border-bottom:1px solid var(--line);
   position:sticky;top:0;z-index:50}
 .brand{font-weight:700;font-size:17px;letter-spacing:.2px}
 .brand::before{content:"✦ ";color:var(--gold)}
+
 .topnav{display:flex;gap:4px}
 .topnav a{padding:8px 14px;border-radius:999px;color:var(--muted);
-  font-size:14px;font-weight:500;transition:all .15s}
+  font-size:14px;font-weight:500;display:flex;align-items:center;gap:6px;
+  transition:all .15s}
 .topnav a.active{color:var(--ink);background:var(--soft)}
+.topnav a .ico{font-size:14px}
 
 main{max-width:760px;margin:0 auto;padding:20px 16px 80px}
 
+/* ── Bottom nav (mobile only) ───────────────────────── */
+.bottomnav{position:fixed;bottom:0;left:0;right:0;
+  display:none;background:#fff;
+  border-top:1px solid var(--line);
+  padding:8px 6px calc(8px + env(safe-area-inset-bottom));
+  z-index:60;box-shadow:0 -4px 16px rgba(28,22,12,.06)}
+.bottomnav a{flex:1;display:flex;flex-direction:column;align-items:center;
+  gap:2px;padding:8px 4px;border-radius:14px;
+  color:var(--muted);font-size:11px;font-weight:600;
+  transition:all .12s;text-align:center;line-height:1.15}
+.bottomnav a .ico{font-size:22px;line-height:1}
+.bottomnav a .lbl{font-size:10.5px;letter-spacing:.2px}
+.bottomnav a.active{color:var(--ink);background:var(--gold-soft)}
+.bottomnav a:active{transform:scale(.93)}
+
 /* ── Hero ───────────────────────────────────────────── */
 .hero{padding:20px 4px 24px}
-.hero-date{color:var(--gold);font-size:13px;font-weight:600;
+.hero-date{color:var(--gold-dark);font-size:12px;font-weight:700;
   text-transform:uppercase;letter-spacing:1.2px;margin-bottom:6px}
 .hero-title{font-size:28px;font-weight:700;letter-spacing:-.5px;line-height:1.15}
 
@@ -47,63 +71,93 @@ main{max-width:760px;margin:0 auto;padding:20px 16px 80px}
 .section-title.danger{color:var(--red)}
 
 /* ── Cards ──────────────────────────────────────────── */
-.card{background:var(--card);border:1px solid var(--line);border-radius:18px;
-  padding:18px;margin-bottom:16px;box-shadow:var(--shadow)}
-.card-h{font-weight:600;margin-bottom:14px;font-size:15px;color:var(--ink-soft)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;
+  padding:20px;margin-bottom:16px;box-shadow:var(--shadow)}
+.card-h{font-weight:700;margin-bottom:14px;font-size:15px;color:var(--ink-soft)}
 
 /* ── Inputs ─────────────────────────────────────────── */
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .col{display:flex;flex-direction:column;gap:12px}
 input[type=text], input[type=date], input:not([type]){
-  padding:14px 16px;border:1.5px solid var(--line);border-radius:12px;
+  padding:15px 16px;border:1.5px solid var(--line);border-radius:14px;
   background:#fff;flex:1;min-width:140px;font-size:16px;
   transition:border-color .15s, box-shadow .15s}
 input[type=text]:focus, input[type=date]:focus, input:not([type]):focus{
   outline:none;border-color:var(--gold);
   box-shadow:0 0 0 4px rgba(193,154,63,.12)}
 
+/* ── Select ─────────────────────────────────────────── */
+select{padding:15px 16px;border:1.5px solid var(--line);border-radius:14px;
+  background:#fff;font-size:16px;font-weight:500;color:var(--ink);
+  -webkit-appearance:none;appearance:none;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path fill='%238a8273' d='M2 4l4 4 4-4'/></svg>");
+  background-repeat:no-repeat;background-position:right 14px center;padding-right:38px;
+  cursor:pointer}
+select:focus{outline:none;border-color:var(--gold);
+  box-shadow:0 0 0 4px rgba(193,154,63,.12)}
+select:required:invalid{color:var(--muted)}
+
+.form-label{font-size:12px;font-weight:700;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
+
 /* ── Buttons ────────────────────────────────────────── */
-button{cursor:pointer;border:none;border-radius:12px;
-  padding:14px 22px;font-size:15px;font-weight:600;
-  background:var(--ink);color:#fff;transition:transform .1s, opacity .15s}
+button{cursor:pointer;border:none;border-radius:14px;
+  padding:15px 22px;font-size:15px;font-weight:600;
+  background:var(--ink);color:#fff;transition:transform .1s, opacity .15s, background .15s}
 button:active{transform:scale(.97)}
 .btn-primary{background:var(--gold);color:#1a1814;
-  box-shadow:0 4px 14px rgba(193,154,63,.35)}
+  box-shadow:0 4px 14px rgba(193,154,63,.35);font-weight:700}
 .btn-primary:hover{background:#b08d34}
-.btn-ghost{background:#fff;color:var(--ink-soft);border:1.5px solid var(--line);padding:10px 16px;font-weight:500}
+.btn-ghost{background:#fff;color:var(--ink-soft);border:1.5px solid var(--line);padding:11px 16px;font-weight:600}
 .btn-ghost:hover{background:var(--soft)}
-.btn-danger{background:transparent;color:var(--red);border:1.5px solid #f5d4dc;padding:10px 16px;font-weight:500}
+.btn-danger{background:#fff;color:var(--red);border:1.5px solid #f5d4dc;padding:11px 16px;font-weight:600}
 .btn-danger:hover{background:#fde9ee}
 
 /* ── Day picker (recurring) ─────────────────────────── */
 .daypicker{display:flex;gap:6px;flex-wrap:wrap}
-.daypicker label{padding:10px 14px;border:1.5px solid var(--line);border-radius:10px;
-  font-size:13px;font-weight:500;cursor:pointer;background:#fff;
-  user-select:none;transition:all .12s}
+.daypicker label{padding:10px 14px;border:1.5px solid var(--line);border-radius:12px;
+  font-size:13px;font-weight:600;cursor:pointer;background:#fff;
+  user-select:none;transition:all .12s;min-width:48px;text-align:center}
 .daypicker label:has(input:checked){background:var(--ink);color:#fff;border-color:var(--ink)}
 .daypicker input{display:none}
 
-/* ── Task list ──────────────────────────────────────── */
+/* ── Checkrow (case Tâche prioritaire) ──────────────── */
+.checkrow{display:flex;align-items:center;gap:12px;cursor:pointer;
+  padding:14px 16px;background:var(--soft);border-radius:14px;
+  font-size:15px;font-weight:600;user-select:none;
+  border:1.5px solid transparent;transition:all .15s}
+.checkrow:has(input:checked){background:var(--gold-soft);border-color:var(--gold)}
+.checkrow input{width:22px;height:22px;accent-color:var(--gold);cursor:pointer}
+
+/* ── Tasks list ─────────────────────────────────────── */
 .tasks{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px}
 .task{display:flex;gap:14px;align-items:flex-start;
-  background:var(--card);border:1px solid var(--line);border-radius:16px;
-  padding:16px;box-shadow:var(--shadow);transition:transform .1s}
+  background:var(--card);border:1px solid var(--line);border-radius:18px;
+  padding:16px;box-shadow:var(--shadow-sm);transition:transform .1s}
 .task.muted{opacity:.5}
-.task.late{border-color:#f5c2cd;background:#fffafb}
+.task.priority{border-left:4px solid var(--gold);background:linear-gradient(90deg, #fffbf0 0%, #fff 60%)}
+.task.late{border-left:4px solid var(--red);background:linear-gradient(90deg, #fff5f7 0%, #fff 60%)}
 .task-body{flex:1;min-width:0}
 .task-title{font-weight:600;font-size:16px;word-break:break-word;line-height:1.35}
 .task-title.strike{text-decoration:line-through;color:var(--muted);font-weight:500}
-.task-meta{font-size:13px;color:var(--muted);margin-top:4px}
+.task-meta{font-size:13px;color:var(--muted);margin-top:5px}
+.task-note{font-size:13px;color:var(--muted);font-style:italic;margin-top:10px;
+  padding:10px 12px;background:var(--soft);border-radius:10px}
 .task-actions{display:flex;gap:6px;align-items:center}
-.badge{display:inline-block;font-size:11px;font-weight:600;color:var(--gold);
-  background:var(--soft);border-radius:999px;
-  padding:3px 9px;margin-left:6px;text-transform:uppercase;letter-spacing:.5px}
 
-/* Big check button — main employee action */
+/* ── Badges ─────────────────────────────────────────── */
+.badge{display:inline-block;font-size:11px;font-weight:700;
+  background:var(--soft);color:var(--gold-dark);
+  border-radius:999px;padding:3px 9px;margin-right:6px;
+  text-transform:uppercase;letter-spacing:.5px;vertical-align:middle}
+.badge-priority{background:#fff4d6;color:var(--gold-dark)}
+.badge-late{background:#fde9ee;color:var(--red)}
+
+/* ── Check button (employee) ────────────────────────── */
 .check{width:52px;height:52px;border-radius:14px;background:var(--soft);
   border:2px solid var(--line);color:var(--ink);font-size:24px;
   display:flex;align-items:center;justify-content:center;padding:0;
-  flex-shrink:0;font-weight:600}
+  flex-shrink:0;font-weight:600;width:52px}
 .check:hover{background:var(--gold-soft);border-color:var(--gold)}
 .check.checked{background:#e6f7ee;border-color:#9ee0bc;color:var(--green)}
 
@@ -111,108 +165,75 @@ details summary{cursor:pointer;list-style:none;padding:2px 0}
 details summary::-webkit-details-marker{display:none}
 details[open] summary{margin-bottom:8px}
 
-/* ── Empty states ───────────────────────────────────── */
-.empty{padding:40px 20px;text-align:center;color:var(--muted);
+/* ── Empty state ────────────────────────────────────── */
+.empty{padding:48px 20px;text-align:center;color:var(--muted);
   background:var(--card);border:1.5px dashed var(--line);border-radius:18px;
-  font-size:15px}
+  font-size:16px;font-weight:500}
 .empty.soft{padding:22px;font-size:14px}
 
-/* ── Calendrier ─────────────────────────────────────── */
-.cal{background:var(--card);border:1px solid var(--line);
-  border-radius:18px;overflow:hidden;box-shadow:var(--shadow)}
-.cal-head{display:grid;grid-template-columns:repeat(7,1fr);
-  background:var(--soft);border-bottom:1px solid var(--line);
-  font-size:11px;font-weight:700;color:var(--muted);text-align:center;
-  padding:10px 0;text-transform:uppercase;letter-spacing:1px}
-.cal-row{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:1px solid var(--line)}
-.cal-row:last-child{border-bottom:none}
-.cal-cell{min-height:88px;padding:8px;border-right:1px solid var(--line);font-size:12px}
-.cal-cell:last-child{border-right:none}
-.cal-cell.today{background:#fff8e1}
-.cal-cell.past{opacity:.45}
-.cal-date{font-weight:700;color:var(--ink-soft);font-size:13px;margin-bottom:5px}
-.cal-cell.today .cal-date{color:var(--gold)}
-.cal-task{background:var(--gold);color:#1a1814;border-radius:6px;padding:3px 6px;
-  margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-  font-weight:500;font-size:11px}
-.cal-task.done{background:#e6f7ee;color:var(--muted);text-decoration:line-through}
-
-/* ── Mobile ─────────────────────────────────────────── */
-@media (max-width:560px){
-  .topbar{padding:14px 16px}
-  .hero{padding:14px 2px 18px}
-  .hero-title{font-size:24px}
-  main{padding:14px 12px 100px}
-  .card{padding:16px;border-radius:16px}
-  .task{padding:14px}
-  .row{flex-direction:column;align-items:stretch}
-  input[type=text], input[type=date], input:not([type]){width:100%}
-  button{width:100%;padding:16px 20px;font-size:16px}
-  .btn-ghost, .btn-danger{padding:12px 18px;font-size:14px}
-  .task-actions{flex-direction:column}
-  .cal-cell{min-height:62px;padding:5px;font-size:11px}
-  .cal-task{font-size:10px;padding:2px 4px}
-  .check{width:48px;height:48px}
-}
-
-/* ── Badges ─────────────────────────────────────────── */
-.badge{display:inline-block;font-size:11px;font-weight:700;
-  background:var(--soft);color:var(--gold);
-  border-radius:999px;padding:3px 9px;margin-right:6px;
-  text-transform:uppercase;letter-spacing:.5px;vertical-align:middle}
-.badge-priority{background:#fff4d6;color:#9a7320}
-.badge-late{background:#fde9ee;color:var(--red)}
-
-/* Priority highlight on cards */
-.task.priority{border-left:4px solid var(--gold)}
-.task.late{border-left:4px solid var(--red);background:#fffafb}
-
-/* ── Checkbox row (pretty toggle) ────────────────────── */
-.checkrow{display:flex;align-items:center;gap:10px;cursor:pointer;
-  padding:12px 14px;background:var(--soft);border-radius:12px;
-  font-size:15px;font-weight:500;user-select:none;
-  border:1.5px solid transparent;transition:all .15s}
-.checkrow:has(input:checked){background:#fff4d6;border-color:var(--gold-soft)}
-.checkrow input{width:20px;height:20px;accent-color:var(--gold)}
-
-/* ── Select ─────────────────────────────────────────── */
-select{padding:14px 16px;border:1.5px solid var(--line);border-radius:12px;
-  background:#fff;font-size:16px;font-weight:500;color:var(--ink);
-  -webkit-appearance:none;appearance:none;
-  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path fill='%238a8273' d='M2 4l4 4 4-4'/></svg>");
-  background-repeat:no-repeat;background-position:right 14px center;padding-right:38px}
-select:focus{outline:none;border-color:var(--gold);
-  box-shadow:0 0 0 4px rgba(193,154,63,.12)}
-
-.form-label{font-size:12px;font-weight:600;color:var(--muted);
-  text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
-
 /* ── Stats (suivi) ──────────────────────────────────── */
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
-.stat{background:var(--card);border:1px solid var(--line);border-radius:16px;
-  padding:18px 14px;text-align:center;box-shadow:var(--shadow)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:18px;
+  padding:18px 12px;text-align:center;box-shadow:var(--shadow-sm)}
 .stat.highlight{background:linear-gradient(135deg, var(--gold) 0%, #d4ae5a 100%);
-  color:#1a1814;border-color:transparent}
-.stat-value{font-size:28px;font-weight:700;line-height:1;margin-bottom:4px}
-.stat-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;opacity:.7}
+  color:#1a1814;border-color:transparent;box-shadow:var(--shadow)}
+.stat-value{font-size:30px;font-weight:800;line-height:1;margin-bottom:6px}
+.stat-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;opacity:.7}
 .stat.highlight .stat-label{opacity:.85}
 
-.progress{height:10px;background:var(--soft);border-radius:999px;overflow:hidden;
+.progress{height:12px;background:var(--soft);border-radius:999px;overflow:hidden;
   margin-bottom:20px;border:1px solid var(--line)}
 .progress-bar{height:100%;background:linear-gradient(90deg, var(--gold), #d4ae5a);
   border-radius:999px;transition:width .4s ease}
 
-/* Calendrier — tâches prioritaires */
-.cal-task.prio{background:#fff4d6;color:#9a7320;border:1px solid var(--gold)}
-
 /* ── Day blocks (calendrier liste 3 jours) ───────────── */
 .day-block{margin-bottom:24px}
-.day-block.today .day-head{color:var(--gold)}
+.day-block.today .day-head{color:var(--gold-dark)}
 .day-head{display:flex;justify-content:space-between;align-items:baseline;
   padding:6px 4px 12px;border-bottom:1.5px solid var(--line);margin-bottom:12px}
 .day-name{font-size:18px;font-weight:700;text-transform:capitalize}
-.day-count{font-size:12px;font-weight:600;color:var(--muted);
+.day-count{font-size:11px;font-weight:700;color:var(--muted);
   text-transform:uppercase;letter-spacing:.8px}
 
-/* Tiny touch */
+/* ════════════════════════════════════════════════════════
+   MOBILE (≤ 640px)
+   ════════════════════════════════════════════════════════ */
+@media (max-width:640px){
+  .desktop-only{display:none !important}
+  .mobile-only{display:flex !important}
+
+  .topbar{padding:14px 16px}
+  .brand{font-size:16px}
+
+  .bottomnav{display:flex}
+
+  main{padding:16px 14px 100px}
+
+  .hero{padding:12px 2px 18px}
+  .hero-title{font-size:24px}
+  .hero-date{font-size:11px}
+
+  .card{padding:18px;border-radius:18px}
+  .task{padding:14px;border-radius:16px}
+  .row{flex-direction:column;align-items:stretch}
+
+  input[type=text], input[type=date], input:not([type]), select{
+    width:100%;font-size:16px;padding:16px}
+
+  button{width:100%;padding:16px 20px;font-size:16px}
+  .btn-ghost, .btn-danger{padding:12px 18px;font-size:14px}
+
+  .task-actions{flex-direction:column;align-items:stretch}
+  .task-actions button{width:auto}
+
+  .check{width:48px;height:48px;font-size:22px}
+
+  .stats{gap:8px}
+  .stat{padding:14px 8px;border-radius:16px}
+  .stat-value{font-size:24px}
+
+  .daypicker label{padding:9px 11px;font-size:13px;min-width:44px}
+}
+
+/* tiny touch */
 ::selection{background:var(--gold-soft);color:var(--ink)}

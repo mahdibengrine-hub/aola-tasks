@@ -2,15 +2,17 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>AOLA Tasks{% block title %}{% endblock %}</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<meta name="theme-color" content="#1a1814">
 </head>
 <body>
 <header class="topbar">
   <div class="brand">AOLA Tasks</div>
-  <nav class="topnav">{% block nav %}{% endblock %}</nav>
+  <nav class="topnav desktop-only">{% block topnav %}{% endblock %}</nav>
 </header>
 <main>{% block content %}{% endblock %}</main>
+<nav class="bottomnav mobile-only">{% block bottomnav %}{% endblock %}</nav>
 </body>
 </html>

@@ -1,11 +1,7 @@
 {% extends "base.html" %}
-{% block title %} — Récurrentes{% endblock %}
-{% block nav %}
-<a href="{{ url_for('admin_view', token=token) }}">Tableau</a>
-<a href="{{ url_for('admin_calendar', token=token) }}">Calendrier</a>
-<a href="{{ url_for('admin_recurring', token=token) }}" class="active">Récurrentes</a>
-<a href="{{ url_for('admin_follow', token=token) }}">Suivi</a>
-{% endblock %}
+{% block title %} — T.Récurrentes{% endblock %}
+{% block topnav %}{% include '_nav_admin.html' %}{% endblock %}
+{% block bottomnav %}{% include '_nav_admin.html' %}{% endblock %}
 {% block content %}
 <section class="hero">
   <div class="hero-title">🔁 Tâches récurrentes</div>
@@ -16,14 +12,12 @@
   <div class="card-h">➕ Nouvelle récurrente</div>
   <form method="POST" action="{{ url_for('admin_recurring_add', token=token) }}" class="col">
     <input name="title" placeholder="Titre (ex. Appeler les 4 POS)" required>
-    <div class="row">
-      <select name="location" style="flex:1">
-        <option value="">— Lieu —</option>
-        {% for loc in locations %}
-        <option value="{{ loc }}">{{ loc }}</option>
-        {% endfor %}
-      </select>
-    </div>
+    <select name="location" required>
+      <option value="" disabled selected>— Lieu —</option>
+      {% for loc in locations %}
+      <option value="{{ loc }}">{{ loc }}</option>
+      {% endfor %}
+    </select>
     <div>
       <div class="form-label">Jours de la semaine</div>
       <div class="daypicker">
@@ -34,7 +28,7 @@
     </div>
     <label class="checkrow">
       <input type="checkbox" name="priority" value="1">
-      <span>⭐ Tâche prioritaire</span>
+      <span>⭐ Tâche prioritaire&nbsp;?</span>
     </label>
     <button type="submit" class="btn-primary">Créer la récurrente</button>
   </form>
@@ -59,8 +53,8 @@
 
         <form method="POST" action="{{ url_for('admin_recurring_edit', token=token, rid=r.id) }}" class="col" style="margin-top:14px">
           <input name="title" value="{{ r.title }}" required>
-          <select name="location">
-            <option value="">— Lieu —</option>
+          <select name="location" required>
+            <option value="" disabled>— Lieu —</option>
             {% for loc in locations %}
             <option value="{{ loc }}" {% if r.location == loc %}selected{% endif %}>{{ loc }}</option>
             {% endfor %}
@@ -75,18 +69,16 @@
           </div>
           <label class="checkrow">
             <input type="checkbox" name="priority" value="1" {% if r.priority %}checked{% endif %}>
-            <span>⭐ Prioritaire</span>
+            <span>⭐ Tâche prioritaire&nbsp;?</span>
           </label>
           <button type="submit" class="btn-ghost">Enregistrer</button>
         </form>
 
-        <div class="row" style="margin-top:14px;gap:8px">
-          <form method="POST" action="{{ url_for('admin_recurring_skip', token=token) }}" class="row" style="flex:1;gap:6px;align-items:center">
-            <input type="hidden" name="rid" value="{{ r.id }}">
-            <input type="date" name="skip_date" value="{{ today }}" style="flex:1">
-            <button type="submit" class="btn-ghost">⏸ Sauter ce jour</button>
-          </form>
-        </div>
+        <form method="POST" action="{{ url_for('admin_recurring_skip', token=token) }}" class="row" style="margin-top:14px;gap:6px;align-items:center">
+          <input type="hidden" name="rid" value="{{ r.id }}">
+          <input type="date" name="skip_date" value="{{ today }}" style="flex:1">
+          <button type="submit" class="btn-ghost">⏸ Sauter ce jour</button>
+        </form>
       </details>
     </div>
     <div class="task-actions">
@@ -101,6 +93,6 @@
   {% endfor %}
 </ul>
 {% else %}
-<div class="empty soft">Pas encore de tâche récurrente. Crée ta première ci-dessus.</div>
+<div class="empty soft">Liste vide.</div>
 {% endif %}
 {% endblock %}
