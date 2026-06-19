@@ -155,5 +155,55 @@ details[open] summary{margin-bottom:8px}
   .check{width:48px;height:48px}
 }
 
+/* ── Badges ─────────────────────────────────────────── */
+.badge{display:inline-block;font-size:11px;font-weight:700;
+  background:var(--soft);color:var(--gold);
+  border-radius:999px;padding:3px 9px;margin-right:6px;
+  text-transform:uppercase;letter-spacing:.5px;vertical-align:middle}
+.badge-priority{background:#fff4d6;color:#9a7320}
+.badge-late{background:#fde9ee;color:var(--red)}
+
+/* Priority highlight on cards */
+.task.priority{border-left:4px solid var(--gold)}
+.task.late{border-left:4px solid var(--red);background:#fffafb}
+
+/* ── Checkbox row (pretty toggle) ────────────────────── */
+.checkrow{display:flex;align-items:center;gap:10px;cursor:pointer;
+  padding:12px 14px;background:var(--soft);border-radius:12px;
+  font-size:15px;font-weight:500;user-select:none;
+  border:1.5px solid transparent;transition:all .15s}
+.checkrow:has(input:checked){background:#fff4d6;border-color:var(--gold-soft)}
+.checkrow input{width:20px;height:20px;accent-color:var(--gold)}
+
+/* ── Select ─────────────────────────────────────────── */
+select{padding:14px 16px;border:1.5px solid var(--line);border-radius:12px;
+  background:#fff;font-size:16px;font-weight:500;color:var(--ink);
+  -webkit-appearance:none;appearance:none;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path fill='%238a8273' d='M2 4l4 4 4-4'/></svg>");
+  background-repeat:no-repeat;background-position:right 14px center;padding-right:38px}
+select:focus{outline:none;border-color:var(--gold);
+  box-shadow:0 0 0 4px rgba(193,154,63,.12)}
+
+.form-label{font-size:12px;font-weight:600;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
+
+/* ── Stats (suivi) ──────────────────────────────────── */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px 14px;text-align:center;box-shadow:var(--shadow)}
+.stat.highlight{background:linear-gradient(135deg, var(--gold) 0%, #d4ae5a 100%);
+  color:#1a1814;border-color:transparent}
+.stat-value{font-size:28px;font-weight:700;line-height:1;margin-bottom:4px}
+.stat-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;opacity:.7}
+.stat.highlight .stat-label{opacity:.85}
+
+.progress{height:10px;background:var(--soft);border-radius:999px;overflow:hidden;
+  margin-bottom:20px;border:1px solid var(--line)}
+.progress-bar{height:100%;background:linear-gradient(90deg, var(--gold), #d4ae5a);
+  border-radius:999px;transition:width .4s ease}
+
+/* Calendrier — tâches prioritaires */
+.cal-task.prio{background:#fff4d6;color:#9a7320;border:1px solid var(--gold)}
+
 /* Tiny touch */
 ::selection{background:var(--gold-soft);color:var(--ink)}

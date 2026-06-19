@@ -1,12 +1,20 @@
 {% extends "base.html" %}
 {% block title %} — Calendrier{% endblock %}
 {% block nav %}
+{% if is_admin %}
 <a href="{{ url_for('admin_view', token=token) }}">Tableau</a>
 <a href="{{ url_for('admin_calendar', token=token) }}" class="active">Calendrier</a>
+<a href="{{ url_for('admin_recurring', token=token) }}">Récurrentes</a>
+<a href="{{ url_for('admin_follow', token=token) }}">Suivi</a>
+{% else %}
+<a href="{{ url_for('employee_view', token=token) }}">Aujourd'hui</a>
+<a href="{{ url_for('employee_calendar', token=token) }}" class="active">Calendrier</a>
+{% endif %}
 {% endblock %}
 {% block content %}
 <section class="hero">
-  <div class="hero-title">📅 Calendrier (6 semaines)</div>
+  <div class="hero-title">📅 Calendrier</div>
+  <div class="hero-date">{{ weeks|length }} semaines à venir</div>
 </section>
 <div class="cal">
   <div class="cal-head">
@@ -18,7 +26,9 @@
     <div class="cal-cell {% if day.is_today %}today{% endif %} {% if day.is_past %}past{% endif %}">
       <div class="cal-date">{{ day.date.day }}/{{ '%02d' % day.date.month }}</div>
       {% for t in day.tasks %}
-        <div class="cal-task{% if t.done_at %} done{% endif %}">{{ t.title }}</div>
+        <div class="cal-task{% if t.done_at %} done{% endif %}{% if t.priority %} prio{% endif %}" title="{{ t.title }}">
+          {% if t.priority %}⭐ {% endif %}{{ t.title }}
+        </div>
       {% endfor %}
     </div>
     {% endfor %}

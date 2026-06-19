@@ -1,35 +1,47 @@
 {% extends "base.html" %}
-{% block title %} — Mes tâches{% endblock %}
+{% block title %} — Aujourd'hui{% endblock %}
+{% block nav %}
+<a href="{{ url_for('employee_view', token=token) }}" class="active">Aujourd'hui</a>
+<a href="{{ url_for('employee_calendar', token=token) }}">Calendrier</a>
+{% endblock %}
 {% block content %}
 <section class="hero">
   <div class="hero-date">{{ today_label }}</div>
-  <div class="hero-title">Tes tâches du jour</div>
+  <div class="hero-title">Tes tâches</div>
 </section>
 
-{% if today_tasks %}
-<ul class="tasks">
-  {% for t in today_tasks %}
-  <li class="task{% if t.due_date and t.due_date < today_label %} late{% endif %}">
-    <form method="POST" action="{{ url_for('employee_done', token=token, tid=t.id) }}">
-      <button type="submit" class="check" aria-label="Marquer comme fait">⬜</button>
-    </form>
-    <div class="task-body">
-      <div class="task-title">{{ t.title }}</div>
-      {% if t.due_date %}
-        <div class="task-meta">échéance : {{ t.due_date }}{% if t.recurring_id %} · récurrente{% endif %}</div>
-      {% elif t.recurring_id %}
-        <div class="task-meta">récurrente</div>
-      {% endif %}
-    </div>
-  </li>
+{% if grouped %}
+  {% for loc_name, tasks in grouped %}
+    <h2 class="section-title">📍 {{ loc_name }}</h2>
+    <ul class="tasks">
+      {% for t in tasks %}
+      <li class="task{% if t.is_waiting %} late{% endif %}{% if t.is_priority %} priority{% endif %}">
+        <form method="POST" action="{{ url_for('employee_done', token=token, tid=t.id) }}">
+          <button type="submit" class="check" aria-label="Marquer comme fait">⬜</button>
+        </form>
+        <div class="task-body">
+          <div class="task-title">
+            {% if t.is_priority %}<span class="badge badge-priority">⭐ Prioritaire</span>{% endif %}
+            {% if t.is_waiting %}<span class="badge badge-late">🔴 En attente</span>{% endif %}
+            {{ t.title }}
+          </div>
+          <div class="task-meta">
+            {% if t.is_waiting %}⏳ En retard depuis le {{ t.due_date }}
+            {% else %}⏳ À faire
+            {% endif %}
+            {% if t.recurring_id %} · récurrente{% endif %}
+          </div>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
   {% endfor %}
-</ul>
 {% else %}
 <div class="empty">🎉 Tout est fait. Bonne journée !</div>
 {% endif %}
 
 {% if done_today %}
-<h2 class="section-title">Faites aujourd'hui ({{ done_today|length }})</h2>
+<h2 class="section-title">✅ Faites aujourd'hui ({{ done_today|length }})</h2>
 <ul class="tasks done">
   {% for t in done_today %}
   <li class="task">
@@ -38,7 +50,9 @@
     </form>
     <div class="task-body">
       <div class="task-title strike">{{ t.title }}</div>
-      <div class="task-meta">fait à {{ t.done_at[11:16] }}</div>
+      <div class="task-meta">
+        {% if t.location %}📍 {{ t.location }} · {% endif %}fait à {{ t.done_at[11:16] }}
+      </div>
     </div>
   </li>
   {% endfor %}

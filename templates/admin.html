@@ -1,21 +1,34 @@
 {% extends "base.html" %}
-{% block title %} — Admin{% endblock %}
+{% block title %} — Tableau{% endblock %}
 {% block nav %}
 <a href="{{ url_for('admin_view', token=token) }}" class="active">Tableau</a>
 <a href="{{ url_for('admin_calendar', token=token) }}">Calendrier</a>
+<a href="{{ url_for('admin_recurring', token=token) }}">Récurrentes</a>
+<a href="{{ url_for('admin_follow', token=token) }}">Suivi</a>
 {% endblock %}
 {% block content %}
 <section class="hero">
-  <div class="hero-title">Tableau de bord</div>
-  <div class="hero-date">{{ today }}</div>
+  <div class="hero-date">{{ today_label }}</div>
+  <div class="hero-title">Tableau des tâches</div>
 </section>
 
-<!-- Ajouter une tache ponctuelle -->
 <div class="card">
   <div class="card-h">➕ Nouvelle tâche</div>
-  <form method="POST" action="{{ url_for('admin_add', token=token) }}" class="row">
-    <input name="title" placeholder="Titre de la tâche…" required style="flex:2">
-    <input type="date" name="due_date" style="flex:1" min="{{ today }}">
+  <form method="POST" action="{{ url_for('admin_add', token=token) }}" class="col">
+    <input name="title" placeholder="Titre de la tâche…" required>
+    <div class="row">
+      <input type="date" name="due_date" required min="{{ today }}" style="flex:1">
+      <select name="location" style="flex:1">
+        <option value="">— Lieu —</option>
+        {% for loc in locations %}
+        <option value="{{ loc }}">{{ loc }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <label class="checkrow">
+      <input type="checkbox" name="priority" value="1">
+      <span>⭐ Tâche prioritaire</span>
+    </label>
     <button type="submit" class="btn-primary">Ajouter</button>
   </form>
 </div>
@@ -23,18 +36,14 @@
 {% if overdue %}
 <h2 class="section-title danger">⚠ En retard ({{ overdue|length }})</h2>
 <ul class="tasks">
-  {% for t in overdue %}
-  {% include "_admin_task.html" %}
-  {% endfor %}
+  {% for t in overdue %}{% include "_admin_task.html" %}{% endfor %}
 </ul>
 {% endif %}
 
 <h2 class="section-title">Aujourd'hui ({{ today_tasks|length }})</h2>
 {% if today_tasks %}
 <ul class="tasks">
-  {% for t in today_tasks %}
-  {% include "_admin_task.html" %}
-  {% endfor %}
+  {% for t in today_tasks %}{% include "_admin_task.html" %}{% endfor %}
 </ul>
 {% else %}
 <div class="empty soft">Rien pour aujourd'hui.</div>
@@ -43,67 +52,7 @@
 {% if upcoming %}
 <h2 class="section-title">À venir ({{ upcoming|length }})</h2>
 <ul class="tasks">
-  {% for t in upcoming %}
-  {% include "_admin_task.html" %}
-  {% endfor %}
-</ul>
-{% endif %}
-
-{% if no_date %}
-<h2 class="section-title">Sans date</h2>
-<ul class="tasks">
-  {% for t in no_date %}
-  {% include "_admin_task.html" %}
-  {% endfor %}
-</ul>
-{% endif %}
-
-<!-- Recurrentes -->
-<h2 class="section-title">🔁 Tâches récurrentes</h2>
-<div class="card">
-  <div class="card-h">Nouvelle récurrente</div>
-  <form method="POST" action="{{ url_for('admin_add_recurring', token=token) }}" class="col">
-    <input name="title" placeholder="Titre (ex. Appeler les 4 POS)" required>
-    <div class="daypicker">
-      {% for n, lab in days_label.items() %}
-        <label><input type="checkbox" name="days" value="{{ n }}" checked> {{ lab }}</label>
-      {% endfor %}
-    </div>
-    <button type="submit" class="btn-primary">Créer</button>
-  </form>
-</div>
-{% if recurring %}
-<ul class="tasks">
-  {% for r in recurring %}
-  <li class="task {% if not r.active %}muted{% endif %}">
-    <div class="task-body">
-      <div class="task-title">{{ r.title }}</div>
-      <div class="task-meta">jours : {% for n in r.days_mask.split(',') %}{{ days_label[n] }}{% if not loop.last %} · {% endif %}{% endfor %}</div>
-    </div>
-    <div class="task-actions">
-      <form method="POST" action="{{ url_for('admin_toggle_recurring', token=token, rid=r.id) }}" style="display:inline">
-        <button type="submit" class="btn-ghost">{% if r.active %}Désactiver{% else %}Activer{% endif %}</button>
-      </form>
-      <form method="POST" action="{{ url_for('admin_delete_recurring', token=token, rid=r.id) }}" style="display:inline" onsubmit="return confirm('Supprimer cette récurrente ?')">
-        <button type="submit" class="btn-danger">Suppr</button>
-      </form>
-    </div>
-  </li>
-  {% endfor %}
-</ul>
-{% endif %}
-
-{% if recent_done %}
-<h2 class="section-title">✓ Récemment faites</h2>
-<ul class="tasks done">
-  {% for t in recent_done %}
-  <li class="task">
-    <div class="task-body">
-      <div class="task-title strike">{{ t.title }}</div>
-      <div class="task-meta">{{ t.done_at }}</div>
-    </div>
-  </li>
-  {% endfor %}
+  {% for t in upcoming %}{% include "_admin_task.html" %}{% endfor %}
 </ul>
 {% endif %}
 {% endblock %}

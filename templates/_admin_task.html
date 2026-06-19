@@ -1,20 +1,36 @@
-<li class="task">
+<li class="task{% if t.priority %} priority{% endif %}">
   <div class="task-body">
     <details>
       <summary>
+        {% if t.priority %}<span class="badge badge-priority">⭐</span>{% endif %}
         <span class="task-title">{{ t.title }}</span>
-        {% if t.due_date %}<span class="task-meta"> · {{ t.due_date }}</span>{% endif %}
-        {% if t.recurring_id %}<span class="badge">récurrente</span>{% endif %}
+        <div class="task-meta">
+          {% if t.location %}📍 {{ t.location }}{% endif %}
+          {% if t.due_date %}{% if t.location %} · {% endif %}{{ t.due_date }}{% endif %}
+          {% if t.recurring_id %} · récurrente{% endif %}
+        </div>
       </summary>
-      <form method="POST" action="{{ url_for('admin_edit', token=token, tid=t.id) }}" class="row" style="margin-top:8px">
-        <input name="title" value="{{ t.title }}" required style="flex:2">
-        <input type="date" name="due_date" value="{{ t.due_date or '' }}" style="flex:1">
+      <form method="POST" action="{{ url_for('admin_edit', token=token, tid=t.id) }}" class="col" style="margin-top:12px">
+        <input name="title" value="{{ t.title }}" required>
+        <div class="row">
+          <input type="date" name="due_date" value="{{ t.due_date or '' }}" style="flex:1">
+          <select name="location" style="flex:1">
+            <option value="">— Lieu —</option>
+            {% for loc in locations %}
+            <option value="{{ loc }}" {% if t.location == loc %}selected{% endif %}>{{ loc }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <label class="checkrow">
+          <input type="checkbox" name="priority" value="1" {% if t.priority %}checked{% endif %}>
+          <span>⭐ Prioritaire</span>
+        </label>
         <button type="submit" class="btn-ghost">Enregistrer</button>
       </form>
     </details>
   </div>
   <div class="task-actions">
-    <form method="POST" action="{{ url_for('admin_delete', token=token, tid=t.id) }}" onsubmit="return confirm('Supprimer ?')" style="display:inline">
+    <form method="POST" action="{{ url_for('admin_delete', token=token, tid=t.id) }}" onsubmit="return confirm('Supprimer cette tâche ?')" style="display:inline">
       <button type="submit" class="btn-danger">Suppr</button>
     </form>
   </div>
