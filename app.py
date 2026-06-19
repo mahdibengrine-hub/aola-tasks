@@ -229,39 +229,39 @@ def employee_undo(token, tid):
 @app.route('/e/<token>/calendar')
 def employee_calendar(token):
     require_token(token, 'EMPLOYEE_TOKEN')
-    weeks, today = _calendar_weeks(4)
+    days, today = _next_days(3)
     return render_template('calendar.html',
-                           weeks=weeks, token=token, today=today,
-                           is_admin=False, fr_short=fr_short)
+                           days=days, token=token, today=today,
+                           is_admin=False)
 
 
 # ── Helpers calendrier ────────────────────────────────────────────────────
-def _calendar_weeks(n_weeks):
+def _next_days(n_days):
+    """Renvoie les n prochains jours (à partir d'aujourd'hui) avec leurs tâches.
+    Exclut les tâches récurrentes (recurring_id IS NOT NULL)."""
     db = get_db()
     today = date.today()
-    start = today - timedelta(days=today.weekday())
-    end   = start + timedelta(weeks=n_weeks)
+    end = today + timedelta(days=n_days)
     rows = db.execute(
         "SELECT * FROM task WHERE due_date >= ? AND due_date < ? "
-        "ORDER BY priority DESC, due_date ASC",
-        (start.isoformat(), end.isoformat())).fetchall()
+        "AND recurring_id IS NULL "
+        "ORDER BY priority DESC, due_date ASC, id ASC",
+        (today.isoformat(), end.isoformat())).fetchall()
     by_day = {}
     for r in rows:
         by_day.setdefault(r['due_date'], []).append(dict(r))
-    weeks = []
-    for w in range(n_weeks):
-        wk = []
-        for d in range(7):
-            day = start + timedelta(weeks=w, days=d)
-            wk.append({
-                'date':     day,
-                'iso':      day.isoformat(),
-                'tasks':    by_day.get(day.isoformat(), []),
-                'is_today': day == today,
-                'is_past':  day < today,
-            })
-        weeks.append(wk)
-    return weeks, today
+    days = []
+    for i in range(n_days):
+        d = today + timedelta(days=i)
+        days.append({
+            'date':     d,
+            'iso':      d.isoformat(),
+            'label':    fr_long(d),
+            'short':    fr_short(d),
+            'tasks':    by_day.get(d.isoformat(), []),
+            'is_today': i == 0,
+        })
+    return days, today
 
 
 # ── Routes admin ──────────────────────────────────────────────────────────
@@ -443,10 +443,10 @@ def admin_recurring_skip(token):
 @app.route('/a/<token>/calendar')
 def admin_calendar(token):
     require_token(token, 'ADMIN_TOKEN')
-    weeks, today = _calendar_weeks(6)
+    days, today = _next_days(3)
     return render_template('calendar.html',
-                           weeks=weeks, token=token, today=today,
-                           is_admin=True, fr_short=fr_short)
+                           days=days, token=token, today=today,
+                           is_admin=True)
 
 
 # ── Suivi ─────────────────────────────────────────────────────────────────

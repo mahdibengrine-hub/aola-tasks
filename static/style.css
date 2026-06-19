@@ -205,5 +205,14 @@ select:focus{outline:none;border-color:var(--gold);
 /* Calendrier — tâches prioritaires */
 .cal-task.prio{background:#fff4d6;color:#9a7320;border:1px solid var(--gold)}
 
+/* ── Day blocks (calendrier liste 3 jours) ───────────── */
+.day-block{margin-bottom:24px}
+.day-block.today .day-head{color:var(--gold)}
+.day-head{display:flex;justify-content:space-between;align-items:baseline;
+  padding:6px 4px 12px;border-bottom:1.5px solid var(--line);margin-bottom:12px}
+.day-name{font-size:18px;font-weight:700;text-transform:capitalize}
+.day-count{font-size:12px;font-weight:600;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.8px}
+
 /* Tiny touch */
 ::selection{background:var(--gold-soft);color:var(--ink)}

@@ -13,26 +13,33 @@
 {% endblock %}
 {% block content %}
 <section class="hero">
-  <div class="hero-title">📅 Calendrier</div>
-  <div class="hero-date">{{ weeks|length }} semaines à venir</div>
+  <div class="hero-title">📅 Les prochains jours</div>
+  <div class="hero-date">Tâches programmées sur 3 jours</div>
 </section>
-<div class="cal">
-  <div class="cal-head">
-    <div>Lun</div><div>Mar</div><div>Mer</div><div>Jeu</div><div>Ven</div><div>Sam</div><div>Dim</div>
+
+{% for day in days %}
+<div class="day-block{% if day.is_today %} today{% endif %}">
+  <div class="day-head">
+    <span class="day-name">{{ day.label }}{% if day.is_today %} · Aujourd'hui{% endif %}</span>
+    <span class="day-count">{{ day.tasks|length }} tâche{% if day.tasks|length != 1 %}s{% endif %}</span>
   </div>
-  {% for week in weeks %}
-  <div class="cal-row">
-    {% for day in week %}
-    <div class="cal-cell {% if day.is_today %}today{% endif %} {% if day.is_past %}past{% endif %}">
-      <div class="cal-date">{{ day.date.day }}/{{ '%02d' % day.date.month }}</div>
-      {% for t in day.tasks %}
-        <div class="cal-task{% if t.done_at %} done{% endif %}{% if t.priority %} prio{% endif %}" title="{{ t.title }}">
-          {% if t.priority %}⭐ {% endif %}{{ t.title }}
+  {% if day.tasks %}
+  <ul class="tasks">
+    {% for t in day.tasks %}
+    <li class="task{% if t.priority %} priority{% endif %}">
+      <div class="task-body">
+        <div class="task-title">
+          {% if t.priority %}<span class="badge badge-priority">⭐</span>{% endif %}
+          {{ t.title }}
         </div>
-      {% endfor %}
-    </div>
+        {% if t.location %}<div class="task-meta">📍 {{ t.location }}</div>{% endif %}
+      </div>
+    </li>
     {% endfor %}
-  </div>
-  {% endfor %}
+  </ul>
+  {% else %}
+  <div class="empty soft">Rien de prévu.</div>
+  {% endif %}
 </div>
+{% endfor %}
 {% endblock %}
