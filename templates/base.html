@@ -5,14 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>AOLA Tasks{% block title %}{% endblock %}</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-<meta name="theme-color" content="#1a1814">
+<meta name="theme-color" content="#0f766e">
 </head>
 <body>
 <header class="topbar">
   <div class="brand">AOLA Tasks</div>
   <nav class="topnav desktop-only">{% block topnav %}{% endblock %}</nav>
 </header>
-<main>{% block content %}{% endblock %}</main>
+<main>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flashes">
+        {% for category, msg in messages %}
+        <div class="flash flash-{{ category }}">{{ msg }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</main>
 <nav class="bottomnav mobile-only">{% block bottomnav %}{% endblock %}</nav>
 </body>
 </html>

@@ -9,9 +9,10 @@ Stack : Flask + SQLite (1 fichier dans /data ou ./data).
 import os
 import sqlite3
 from datetime import datetime, date, timedelta
-from flask import Flask, render_template, request, redirect, url_for, abort, g
+from flask import Flask, render_template, request, redirect, url_for, abort, g, flash
 
 app = Flask(__name__)
+app.secret_key = os.environ.get('SECRET_KEY') or 'aola-tasks-flash-key-' + (os.environ.get('ADMIN_TOKEN') or 'dev')
 
 
 # ── Config ────────────────────────────────────────────────────────────────
@@ -375,16 +376,24 @@ def admin_postpone(token, tid):
     require_token(token, 'ADMIN_TOKEN')
     new_date = (request.form.get('new_date') or '').strip()
     if not new_date:
+        flash("Choisis une date avant de reporter.", 'error')
         return redirect(request.referrer or url_for('admin_view', token=token))
     db = get_db()
-    # On garde original_due_date intact ; on met juste a jour due_date.
-    # S'il n'y a pas d'original (anciennes taches), on le met = ancien due_date.
+    existing = db.execute('SELECT title, due_date FROM task WHERE id=?', (tid,)).fetchone()
+    if not existing:
+        flash("Tâche introuvable.", 'error')
+        return redirect(request.referrer or url_for('admin_view', token=token))
     db.execute(
         'UPDATE task SET '
         '  original_due_date = COALESCE(original_due_date, due_date), '
         '  due_date = ? '
         'WHERE id=?', (new_date, tid))
     db.commit()
+    try:
+        d_fr = fr_long(date.fromisoformat(new_date))
+        flash(f'« {existing["title"]} » reportée au {d_fr}.', 'success')
+    except Exception:
+        flash('Tâche reportée.', 'success')
     return redirect(request.referrer or url_for('admin_view', token=token))
 
 
@@ -429,13 +438,20 @@ def admin_edit(token, tid):
     due      = (request.form.get('due_date') or '').strip() or None
     priority = 1 if request.form.get('priority') else 0
     location = normalize_location(request.form.get('location'))
-    if not title or not due or not location:
-        return redirect(request.referrer or url_for('admin_view', token=token))
     db = get_db()
+    existing = db.execute('SELECT title, due_date, location FROM task WHERE id=?', (tid,)).fetchone()
+    if not existing:
+        flash("Tâche introuvable.", 'error')
+        return redirect(request.referrer or url_for('admin_view', token=token))
+    # Conserve les valeurs existantes si le champ n'a pas été fourni
+    if not title: title = existing['title']
+    if not due:   due   = existing['due_date']
+    if not location: location = existing['location']
     db.execute(
         'UPDATE task SET title=?, due_date=?, priority=?, location=? WHERE id=?',
         (title, due, priority, location, tid))
     db.commit()
+    flash('Tâche modifiée.', 'success')
     return redirect(request.referrer or url_for('admin_view', token=token))
 
 

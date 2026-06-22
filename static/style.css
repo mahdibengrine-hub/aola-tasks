@@ -33,6 +33,14 @@ a{color:var(--teal-dark);text-decoration:none}
 .desktop-only{display:flex}
 .mobile-only{display:none}
 
+/* ── Flash messages ─────────────────────────────────── */
+.flashes{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.flash{padding:14px 16px;border-radius:14px;font-weight:600;font-size:14px;
+  border:1.5px solid transparent;animation:flashIn .3s ease}
+.flash-success{background:var(--teal-pale);color:var(--teal-deep);border-color:var(--teal-soft)}
+.flash-error{background:var(--coral-soft);color:var(--coral);border-color:#fbcfd5}
+@keyframes flashIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+
 /* ── Topbar ─────────────────────────────────────────── */
 .topbar{display:flex;align-items:center;justify-content:space-between;
   padding:18px 20px;background:#fff;
