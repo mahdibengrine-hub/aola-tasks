@@ -11,17 +11,17 @@
 {% if transfers %}
 <section class="transfer-banner">
   <div class="transfer-head">
-    <span class="transfer-emoji">🚚</span>
+    <span class="transfer-emoji">↔️</span>
     <div>
       <div class="transfer-title">Transferts du jour</div>
-      <div class="transfer-sub">{{ transfers|length }} colis à acheminer</div>
+      <div class="transfer-sub">{{ transfers|length }} à acheminer</div>
     </div>
   </div>
   <ul class="transfer-list">
     {% for t in transfers %}
     <li class="transfer-item">
       <form method="POST" action="{{ url_for('employee_done', token=token, tid=t.id) }}">
-        <button type="submit" class="check transfer-check" aria-label="Marquer comme fait">📦</button>
+        <button type="submit" class="check transfer-check" aria-label="Marquer comme fait">⬜</button>
       </form>
       <div class="transfer-body">
         <div class="transfer-line1">
