@@ -369,7 +369,14 @@ def admin_add(token):
     location    = normalize_location(request.form.get('location'))
     is_transfer = 1 if request.form.get('is_transfer') else 0
     transfer_no = (request.form.get('transfer_number') or '').strip() or None
+    # Si transfert : titre auto-genere depuis le n°, le titre saisi est ignore
+    if is_transfer:
+        if not transfer_no:
+            flash("Le numéro du transfert est obligatoire.", 'error')
+            return redirect(url_for('admin_view', token=token))
+        title = f"Transfert #{transfer_no.lstrip('#')}"
     if not title or not due or not location:
+        flash("Tous les champs sont obligatoires.", 'error')
         return redirect(url_for('admin_view', token=token))
     db = get_db()
     db.execute(
@@ -460,10 +467,18 @@ def admin_edit(token, tid):
         flash("Tâche introuvable.", 'error')
         return redirect(request.referrer or url_for('admin_view', token=token))
     # Conserve les valeurs existantes si le champ n'a pas été fourni
-    if not title: title = existing['title']
     if not due:   due   = existing['due_date']
     if not location: location = existing['location']
-    if is_transfer and not transfer_no: transfer_no = existing['transfer_number']
+    if is_transfer:
+        if not transfer_no:
+            transfer_no = existing['transfer_number']
+        if transfer_no:
+            title = f"Transfert #{transfer_no.lstrip('#')}"
+        elif not title:
+            title = existing['title']
+    else:
+        if not title: title = existing['title']
+        transfer_no = None
     db.execute(
         'UPDATE task SET title=?, due_date=?, priority=?, location=?, '
         'is_transfer=?, transfer_number=? WHERE id=?',

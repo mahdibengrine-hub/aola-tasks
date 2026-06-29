@@ -25,5 +25,32 @@
   {% block content %}{% endblock %}
 </main>
 <nav class="bottomnav mobile-only">{% block bottomnav %}{% endblock %}</nav>
+<script>
+// Toggle "Transfert ?" : remplace Titre par N° du transfert et change le label Lieu.
+(function(){
+  function sync(form){
+    var cb = form.querySelector('.transfer-toggle');
+    if (!cb) return;
+    var titleBox = form.querySelector('.field-title');
+    var transBox = form.querySelector('.field-transfer');
+    var titleInput = titleBox ? titleBox.querySelector('input') : null;
+    var transInput = transBox ? transBox.querySelector('input') : null;
+    var locLabel = form.querySelector('.loc-label');
+    var locPh    = form.querySelector('.loc-placeholder');
+    function apply(){
+      var on = cb.checked;
+      if (titleBox) titleBox.hidden = on;
+      if (transBox) transBox.hidden = !on;
+      if (titleInput) titleInput.required = !on;
+      if (transInput) transInput.required = on;
+      if (locLabel) locLabel.textContent = on ? 'Récupérer à…' : 'Lieu';
+      if (locPh)    locPh.textContent    = on ? '— Récupérer à… —' : '— Choisis un lieu —';
+    }
+    cb.addEventListener('change', apply);
+    apply();
+  }
+  document.querySelectorAll('form.task-form').forEach(sync);
+})();
+</script>
 </body>
 </html>

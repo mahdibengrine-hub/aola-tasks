@@ -13,12 +13,21 @@
       </summary>
 
       {% if not t.recurring_id %}
-      <form method="POST" action="{{ url_for('admin_edit', token=token, tid=t.id) }}" class="col" style="margin-top:12px">
-        <input name="title" value="{{ t.title }}" required>
+      <form method="POST" action="{{ url_for('admin_edit', token=token, tid=t.id) }}" class="col task-form" style="margin-top:12px">
+        <label class="checkrow checkrow-transfer">
+          <input type="checkbox" name="is_transfer" value="1" class="transfer-toggle" {% if t.is_transfer %}checked{% endif %}>
+          <span>↔️ Transfert&nbsp;?</span>
+        </label>
+        <div class="field-title">
+          <input name="title" value="{{ t.title }}" required>
+        </div>
+        <div class="field-transfer">
+          <input type="text" name="transfer_number" value="{{ t.transfer_number or '' }}" placeholder="N° du transfert (ex. 487)">
+        </div>
         <div class="row">
           <input type="date" name="due_date" value="{{ t.due_date or '' }}" required style="flex:1">
-          <select name="location" required style="flex:1">
-            <option value="" disabled>— Lieu —</option>
+          <select name="location" required class="loc-select" style="flex:1">
+            <option value="" disabled class="loc-placeholder">— Lieu —</option>
             {% for loc in locations %}
             <option value="{{ loc }}" {% if t.location == loc %}selected{% endif %}>{{ loc }}</option>
             {% endfor %}
@@ -28,11 +37,6 @@
           <input type="checkbox" name="priority" value="1" {% if t.priority %}checked{% endif %}>
           <span>⭐ Tâche prioritaire&nbsp;?</span>
         </label>
-        <label class="checkrow checkrow-transfer">
-          <input type="checkbox" name="is_transfer" value="1" {% if t.is_transfer %}checked{% endif %}>
-          <span>↔️ Transfert&nbsp;?</span>
-        </label>
-        <input type="text" name="transfer_number" value="{{ t.transfer_number or '' }}" placeholder="N° du transfert (ex. #1024)">
         <button type="submit" class="btn-ghost">Enregistrer</button>
       </form>
       {% else %}

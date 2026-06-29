@@ -25,10 +25,10 @@
       </form>
       <div class="transfer-body">
         <div class="transfer-line1">
-          {% if t.transfer_number %}<span class="transfer-num">#{{ t.transfer_number }}</span>{% endif %}
-          <span class="transfer-loc">→ {{ t.location or '—' }}</span>
+          {% if t.transfer_number %}<span class="transfer-num">#{{ t.transfer_number|replace('#','') }}</span>{% endif %}
+          <span class="transfer-loc">📍 {{ t.location or '—' }}</span>
         </div>
-        <div class="transfer-line2">{{ t.title }}</div>
+        <div class="transfer-line2">Récupérer le transfert</div>
         {% if t.delay_days and t.delay_days > 0 %}
         <div class="transfer-late">🔴 {{ t.delay_days }}j de retard</div>
         {% endif %}

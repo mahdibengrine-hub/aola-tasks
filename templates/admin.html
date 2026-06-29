@@ -10,19 +10,27 @@
 
 <div class="card">
   <div class="card-h">➕ Nouvelle tâche</div>
-  <form method="POST" action="{{ url_for('admin_add', token=token) }}" class="col">
-    <div class="field">
+  <form method="POST" action="{{ url_for('admin_add', token=token) }}" class="col task-form">
+    <label class="checkrow checkrow-transfer">
+      <input type="checkbox" name="is_transfer" value="1" class="transfer-toggle">
+      <span>↔️ Transfert&nbsp;?</span>
+    </label>
+    <div class="field field-title">
       <div class="form-label">Titre</div>
       <input name="title" placeholder="Ex. Aller chez Yalidine" required>
+    </div>
+    <div class="field field-transfer" hidden>
+      <div class="form-label">N° du transfert</div>
+      <input type="text" name="transfer_number" placeholder="Ex. 487">
     </div>
     <div class="field">
       <div class="form-label">Date</div>
       <input type="date" name="due_date" required min="{{ today }}">
     </div>
     <div class="field">
-      <div class="form-label">Lieu</div>
-      <select name="location" required>
-        <option value="" disabled selected>— Choisis un lieu —</option>
+      <div class="form-label loc-label">Lieu</div>
+      <select name="location" required class="loc-select">
+        <option value="" disabled selected class="loc-placeholder">— Choisis un lieu —</option>
         {% for loc in locations %}
         <option value="{{ loc }}">{{ loc }}</option>
         {% endfor %}
@@ -32,11 +40,6 @@
       <input type="checkbox" name="priority" value="1">
       <span>⭐ Tâche prioritaire&nbsp;?</span>
     </label>
-    <label class="checkrow checkrow-transfer">
-      <input type="checkbox" name="is_transfer" value="1" id="is_transfer">
-      <span>↔️ Transfert&nbsp;?</span>
-    </label>
-    <input type="text" name="transfer_number" placeholder="N° du transfert (ex. #1024)">
     <button type="submit" class="btn-primary">Ajouter</button>
   </form>
 </div>
