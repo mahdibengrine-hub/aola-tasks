@@ -27,6 +27,51 @@
   <div class="progress-bar" style="width:{{ pct_done }}%"></div>
 </div>
 
+{% if transfers_open or transfers_done_today %}
+<h2 class="section-title transfer-title">↔️ Transferts du jour</h2>
+{% if transfers_open %}
+<ul class="tasks">
+  {% for t in transfers_open %}
+  <li class="task transfer-row{% if t.is_waiting %} late{% endif %}">
+    <div class="check" aria-hidden="true">⬜</div>
+    <div class="task-body">
+      <div class="task-title">
+        {% if t.transfer_number %}<span class="badge badge-transfer">#{{ t.transfer_number|replace('#','') }}</span>{% endif %}
+        {% if t.delay_days and t.delay_days > 0 %}<span class="badge badge-late">🔴 {{ t.delay_days }}j de retard</span>{% endif %}
+        {{ t.title }}
+      </div>
+      <div class="task-meta">
+        📍 {{ t.location or '—' }}
+        {% if t.due_date %} · {{ t.due_date|fr_date }}{% endif %}
+      </div>
+    </div>
+  </li>
+  {% endfor %}
+</ul>
+{% endif %}
+{% if transfers_done_today %}
+<ul class="tasks done" style="margin-top:8px">
+  {% for t in transfers_done_today %}
+  <li class="task transfer-row">
+    <div class="check checked" aria-hidden="true">✅</div>
+    <div class="task-body">
+      <div class="task-title strike">
+        {% if t.transfer_number %}<span class="badge badge-transfer">#{{ t.transfer_number|replace('#','') }}</span>{% endif %}
+        {{ t.title }}
+      </div>
+      <div class="task-meta">
+        📍 {{ t.location or '—' }} · fait à {{ t.done_at[11:16] }}
+      </div>
+    </div>
+  </li>
+  {% endfor %}
+</ul>
+{% endif %}
+{% if not transfers_open and not transfers_done_today %}
+<div class="empty soft">Aucun transfert programmé.</div>
+{% endif %}
+{% endif %}
+
 {% if has_overdue or has_today %}
 <div class="row" style="gap:8px;margin-bottom:20px">
   {% if has_overdue %}

@@ -345,18 +345,22 @@ def admin_view(token):
     db = get_db()
     td = today_iso()
     overdue = _enrich(db.execute(
-        'SELECT * FROM task WHERE done_at IS NULL AND due_date<? '
+        'SELECT * FROM task WHERE done_at IS NULL AND due_date<? AND is_transfer=0 '
         'ORDER BY priority DESC, due_date ASC', (td,)).fetchall())
     today_tasks = _enrich(db.execute(
-        'SELECT * FROM task WHERE done_at IS NULL AND due_date=? '
+        'SELECT * FROM task WHERE done_at IS NULL AND due_date=? AND is_transfer=0 '
         'ORDER BY priority DESC, id ASC', (td,)).fetchall())
     upcoming = _enrich(db.execute(
-        'SELECT * FROM task WHERE done_at IS NULL AND due_date>? '
+        'SELECT * FROM task WHERE done_at IS NULL AND due_date>? AND is_transfer=0 '
         'ORDER BY due_date ASC LIMIT 50', (td,)).fetchall())
+    transfers = _enrich(db.execute(
+        'SELECT * FROM task WHERE done_at IS NULL AND is_transfer=1 '
+        'ORDER BY due_date ASC, id ASC').fetchall())
     return render_template('admin.html',
                            overdue=overdue,
                            today_tasks=today_tasks,
                            upcoming=upcoming,
+                           transfers=transfers,
                            token=token,
                            today=td,
                            today_label=fr_long(date.today()),
@@ -623,7 +627,8 @@ def admin_follow(token):
         (td,)).fetchone())
 
     open_today_rows = db.execute(
-        'SELECT * FROM task WHERE done_at IS NULL AND (due_date<=? OR due_date IS NULL) '
+        'SELECT * FROM task WHERE done_at IS NULL AND is_transfer=0 '
+        'AND (due_date<=? OR due_date IS NULL) '
         'ORDER BY priority DESC, due_date ASC, id ASC', (td,)).fetchall()
     open_view = []
     for t in open_today_rows:
@@ -633,20 +638,29 @@ def admin_follow(token):
         d['delay_days']  = compute_delay_days(t)
         open_view.append(d)
 
+    transfers_open = _enrich(db.execute(
+        'SELECT * FROM task WHERE done_at IS NULL AND is_transfer=1 '
+        'ORDER BY due_date ASC, id ASC').fetchall())
+    transfers_done_today = db.execute(
+        "SELECT * FROM task WHERE is_transfer=1 AND date(done_at)=? "
+        "ORDER BY done_at ASC", (td,)).fetchall()
+
     done_today = db.execute(
-        "SELECT * FROM task WHERE date(done_at)=? ORDER BY done_at ASC",
-        (td,)).fetchall()
+        "SELECT * FROM task WHERE is_transfer=0 AND date(done_at)=? "
+        "ORDER BY done_at ASC", (td,)).fetchall()
     done_yesterday = db.execute(
-        "SELECT * FROM task WHERE date(done_at)=? ORDER BY done_at ASC",
-        (yesterday.isoformat(),)).fetchall()
+        "SELECT * FROM task WHERE is_transfer=0 AND date(done_at)=? "
+        "ORDER BY done_at ASC", (yesterday.isoformat(),)).fetchall()
     done_day_before = db.execute(
-        "SELECT * FROM task WHERE date(done_at)=? ORDER BY done_at ASC",
-        (day_before.isoformat(),)).fetchall()
+        "SELECT * FROM task WHERE is_transfer=0 AND date(done_at)=? "
+        "ORDER BY done_at ASC", (day_before.isoformat(),)).fetchall()
 
     total = len(open_today_rows) + len(done_today)
     pct_done = round(100 * len(done_today) / total) if total else 0
     return render_template('follow.html',
                            open_today=open_view,
+                           transfers_open=transfers_open,
+                           transfers_done_today=transfers_done_today,
                            done_today=done_today,
                            done_yesterday=done_yesterday,
                            done_day_before=done_day_before,

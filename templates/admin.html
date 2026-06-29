@@ -44,6 +44,13 @@
   </form>
 </div>
 
+{% if transfers %}
+<h2 class="section-title transfer-title">↔️ Transferts en cours ({{ transfers|length }})</h2>
+<ul class="tasks">
+  {% for t in transfers %}{% include "_admin_task.html" %}{% endfor %}
+</ul>
+{% endif %}
+
 {% if overdue %}
 <h2 class="section-title danger">⚠ En retard ({{ overdue|length }})</h2>
 <ul class="tasks">
