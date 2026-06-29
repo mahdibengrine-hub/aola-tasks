@@ -8,6 +8,31 @@
   <div class="hero-title">Missions of the day 🚀</div>
 </section>
 
+{% if priority_tasks %}
+<h2 class="section-title priority-title">⭐ Prioritaires — à faire en premier</h2>
+<ul class="tasks">
+  {% for t in priority_tasks %}
+  <li class="task priority{% if t.is_waiting %} late{% endif %}">
+    <form method="POST" action="{{ url_for('employee_done', token=token, tid=t.id) }}">
+      <button type="submit" class="check" aria-label="Marquer comme fait">⬜</button>
+    </form>
+    <div class="task-body">
+      <div class="task-title">
+        <span class="badge badge-priority">⭐ Prioritaire</span>
+        {% if t.delay_days and t.delay_days > 0 %}<span class="badge badge-late">🔴 {{ t.delay_days }}j de retard</span>{% endif %}
+        {{ t.title }}
+      </div>
+      <div class="task-meta">
+        📍 {{ t.location or '—' }}
+        {% if t.is_waiting %} · ⏳ Prévue le {{ t.due_date|fr_date }}{% else %} · ⏳ À faire{% endif %}
+        {% if t.recurring_id %} · récurrente{% endif %}
+      </div>
+    </div>
+  </li>
+  {% endfor %}
+</ul>
+{% endif %}
+
 {% if transfers %}
 <section class="transfer-banner">
   <div class="transfer-head">

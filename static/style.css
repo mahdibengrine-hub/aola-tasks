@@ -130,6 +130,10 @@ main{max-width:760px;margin:0 auto;padding:20px 16px 80px}
   font-weight:700;color:var(--muted);margin:28px 4px 12px;
   display:flex;align-items:center;gap:8px}
 .section-title.danger{color:var(--coral)}
+.section-title.priority-title{color:var(--amber-dark);
+  background:linear-gradient(90deg, var(--amber-soft), transparent);
+  padding:8px 12px;border-radius:10px;
+  border-left:4px solid var(--amber);letter-spacing:1px}
 
 /* ── Cards ──────────────────────────────────────────── */
 .card{background:var(--card);border:1px solid var(--line);border-radius:20px;

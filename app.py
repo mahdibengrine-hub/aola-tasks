@@ -238,7 +238,8 @@ def employee_view(token):
         'SELECT * FROM task WHERE done_at IS NULL AND (due_date<=? OR due_date IS NULL) '
         'ORDER BY priority DESC, due_date ASC, id ASC', (td,)).fetchall()
     transfers = []
-    tasks = []
+    priority_tasks = []
+    normal_tasks = []
     for t in open_rows:
         d = dict(t)
         d['is_waiting']  = bool(t['due_date'] and t['due_date'] < td)
@@ -246,17 +247,20 @@ def employee_view(token):
         d['delay_days']  = compute_delay_days(t)
         if t['is_transfer']:
             transfers.append(d)
+        elif t['priority']:
+            priority_tasks.append(d)
         else:
-            tasks.append(d)
-    # priorité d'abord, en attente, puis le reste — tri stable
-    tasks.sort(key=lambda t: (not t['is_priority'], not t['is_waiting']))
-    grouped = group_by_location(tasks)
+            normal_tasks.append(d)
+    # En attente en premier dans le bloc prioritaire
+    priority_tasks.sort(key=lambda t: (not t['is_waiting'], -t['delay_days']))
+    grouped = group_by_location(normal_tasks)
 
     done_today = db.execute(
         "SELECT * FROM task WHERE date(done_at)=? ORDER BY done_at DESC",
         (td,)).fetchall()
     return render_template('employee.html',
                            transfers=transfers,
+                           priority_tasks=priority_tasks,
                            grouped=grouped,
                            done_today=done_today,
                            token=token,
