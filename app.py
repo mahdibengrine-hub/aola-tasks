@@ -117,6 +117,10 @@ def init_db():
         db.execute(
             'UPDATE task SET original_due_date = due_date '
             'WHERE original_due_date IS NULL AND due_date IS NOT NULL')
+    if 'is_transfer' not in task_cols:
+        db.execute('ALTER TABLE task ADD COLUMN is_transfer INTEGER NOT NULL DEFAULT 0')
+    if 'transfer_number' not in task_cols:
+        db.execute('ALTER TABLE task ADD COLUMN transfer_number TEXT')
 
     rec_cols = colset('recurring')
     if 'priority' not in rec_cols:
@@ -233,13 +237,17 @@ def employee_view(token):
     open_rows = db.execute(
         'SELECT * FROM task WHERE done_at IS NULL AND (due_date<=? OR due_date IS NULL) '
         'ORDER BY priority DESC, due_date ASC, id ASC', (td,)).fetchall()
+    transfers = []
     tasks = []
     for t in open_rows:
         d = dict(t)
         d['is_waiting']  = bool(t['due_date'] and t['due_date'] < td)
         d['is_priority'] = bool(t['priority'])
         d['delay_days']  = compute_delay_days(t)
-        tasks.append(d)
+        if t['is_transfer']:
+            transfers.append(d)
+        else:
+            tasks.append(d)
     # priorité d'abord, en attente, puis le reste — tri stable
     tasks.sort(key=lambda t: (not t['is_priority'], not t['is_waiting']))
     grouped = group_by_location(tasks)
@@ -248,6 +256,7 @@ def employee_view(token):
         "SELECT * FROM task WHERE date(done_at)=? ORDER BY done_at DESC",
         (td,)).fetchall()
     return render_template('employee.html',
+                           transfers=transfers,
                            grouped=grouped,
                            done_today=done_today,
                            token=token,
@@ -354,17 +363,20 @@ def admin_view(token):
 @app.route('/a/<token>/add', methods=['POST'])
 def admin_add(token):
     require_token(token, 'ADMIN_TOKEN')
-    title    = (request.form.get('title') or '').strip()
-    due      = (request.form.get('due_date') or '').strip()
-    priority = 1 if request.form.get('priority') else 0
-    location = normalize_location(request.form.get('location'))
+    title       = (request.form.get('title') or '').strip()
+    due         = (request.form.get('due_date') or '').strip()
+    priority    = 1 if request.form.get('priority') else 0
+    location    = normalize_location(request.form.get('location'))
+    is_transfer = 1 if request.form.get('is_transfer') else 0
+    transfer_no = (request.form.get('transfer_number') or '').strip() or None
     if not title or not due or not location:
         return redirect(url_for('admin_view', token=token))
     db = get_db()
     db.execute(
-        'INSERT INTO task(title, due_date, original_due_date, priority, location, created_at) '
-        'VALUES (?,?,?,?,?,?)',
-        (title, due, due, priority, location, now_iso()))
+        'INSERT INTO task(title, due_date, original_due_date, priority, location, '
+        'is_transfer, transfer_number, created_at) '
+        'VALUES (?,?,?,?,?,?,?,?)',
+        (title, due, due, priority, location, is_transfer, transfer_no, now_iso()))
     db.commit()
     return redirect(url_for('admin_view', token=token))
 
@@ -438,8 +450,12 @@ def admin_edit(token, tid):
     due      = (request.form.get('due_date') or '').strip() or None
     priority = 1 if request.form.get('priority') else 0
     location = normalize_location(request.form.get('location'))
+    is_transfer = 1 if request.form.get('is_transfer') else 0
+    transfer_no = (request.form.get('transfer_number') or '').strip() or None
     db = get_db()
-    existing = db.execute('SELECT title, due_date, location FROM task WHERE id=?', (tid,)).fetchone()
+    existing = db.execute(
+        'SELECT title, due_date, location, transfer_number FROM task WHERE id=?',
+        (tid,)).fetchone()
     if not existing:
         flash("Tâche introuvable.", 'error')
         return redirect(request.referrer or url_for('admin_view', token=token))
@@ -447,9 +463,11 @@ def admin_edit(token, tid):
     if not title: title = existing['title']
     if not due:   due   = existing['due_date']
     if not location: location = existing['location']
+    if is_transfer and not transfer_no: transfer_no = existing['transfer_number']
     db.execute(
-        'UPDATE task SET title=?, due_date=?, priority=?, location=? WHERE id=?',
-        (title, due, priority, location, tid))
+        'UPDATE task SET title=?, due_date=?, priority=?, location=?, '
+        'is_transfer=?, transfer_number=? WHERE id=?',
+        (title, due, priority, location, is_transfer, transfer_no, tid))
     db.commit()
     flash('Tâche modifiée.', 'success')
     return redirect(request.referrer or url_for('admin_view', token=token))

@@ -41,6 +41,51 @@ a{color:var(--teal-dark);text-decoration:none}
 .flash-error{background:var(--coral-soft);color:var(--coral);border-color:#fbcfd5}
 @keyframes flashIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
 
+/* ── Transfer banner (fun violet → magenta) ─────────── */
+.transfer-banner{
+  background:linear-gradient(135deg, #7c3aed 0%, #d946ef 60%, #f97316 110%);
+  border-radius:22px;padding:18px 18px 8px;margin-bottom:24px;
+  color:#fff;
+  box-shadow:0 10px 30px rgba(124,58,237,.35), 0 2px 6px rgba(217,70,239,.25);
+  position:relative;overflow:hidden}
+.transfer-banner::before{
+  content:"";position:absolute;top:-40px;right:-40px;width:160px;height:160px;
+  background:radial-gradient(circle, rgba(255,255,255,.18) 0%, transparent 70%);
+  pointer-events:none}
+.transfer-head{display:flex;align-items:center;gap:14px;margin-bottom:14px;
+  position:relative;z-index:1}
+.transfer-emoji{font-size:36px;line-height:1;filter:drop-shadow(0 4px 8px rgba(0,0,0,.2))}
+.transfer-title{font-size:18px;font-weight:800;letter-spacing:-.3px}
+.transfer-sub{font-size:12px;opacity:.9;font-weight:600;letter-spacing:.3px;
+  text-transform:uppercase;margin-top:2px}
+
+.transfer-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;
+  position:relative;z-index:1}
+.transfer-item{display:flex;gap:12px;align-items:flex-start;
+  background:rgba(255,255,255,.16);backdrop-filter:blur(6px);
+  border:1px solid rgba(255,255,255,.25);border-radius:14px;padding:12px;
+  margin-bottom:8px}
+.transfer-check{background:rgba(255,255,255,.95);border:2px solid rgba(255,255,255,.6);
+  color:#7c3aed;width:50px;height:50px;border-radius:14px;font-size:22px;
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  font-weight:700;box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.transfer-check:hover{background:#fff;transform:scale(1.05)}
+.transfer-body{flex:1;min-width:0}
+.transfer-line1{display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  font-weight:700;font-size:15px;line-height:1.2}
+.transfer-num{background:rgba(255,255,255,.25);padding:3px 9px;border-radius:8px;
+  font-family:"SF Mono",ui-monospace,monospace;font-size:13px;font-weight:700;
+  letter-spacing:.3px}
+.transfer-loc{font-size:15px;font-weight:600;opacity:.95}
+.transfer-line2{font-size:13px;opacity:.85;margin-top:4px;font-weight:500}
+.transfer-late{font-size:11px;font-weight:700;background:rgba(255,255,255,.95);
+  color:var(--coral);padding:3px 8px;border-radius:8px;display:inline-block;margin-top:6px}
+
+/* Style spécial pour la checkrow Transfert dans le form admin */
+.checkrow-transfer:has(input:checked){
+  background:linear-gradient(135deg, rgba(124,58,237,.12), rgba(217,70,239,.12));
+  border-color:#a855f7;color:#7c3aed}
+
 /* ── Topbar ─────────────────────────────────────────── */
 .topbar{display:flex;align-items:center;justify-content:space-between;
   padding:18px 20px;background:#fff;
