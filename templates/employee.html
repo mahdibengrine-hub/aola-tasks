@@ -9,28 +9,32 @@
 </section>
 
 {% if priority_tasks %}
-<h2 class="section-title priority-title">⭐ Prioritaires — à faire en premier</h2>
-<ul class="tasks">
-  {% for t in priority_tasks %}
-  <li class="task priority{% if t.is_waiting %} late{% endif %}">
-    <form method="POST" action="{{ url_for('employee_done', token=token, tid=t.id) }}">
-      <button type="submit" class="check" aria-label="Marquer comme fait">⬜</button>
-    </form>
-    <div class="task-body">
-      <div class="task-title">
-        <span class="badge badge-priority">⭐ Prioritaire</span>
-        {% if t.delay_days and t.delay_days > 0 %}<span class="badge badge-late">🔴 {{ t.delay_days }}j de retard</span>{% endif %}
-        {{ t.title }}
-      </div>
-      <div class="task-meta">
-        📍 {{ t.location or '—' }}
-        {% if t.is_waiting %} · ⏳ Prévue le {{ t.due_date|fr_date }}{% else %} · ⏳ À faire{% endif %}
-        {% if t.recurring_id %} · récurrente{% endif %}
-      </div>
+<section class="priority-block">
+  <div class="priority-head">
+    <span class="priority-emoji">⭐</span>
+    <div>
+      <div class="priority-title">Prioritaires</div>
+      <div class="priority-sub">À faire en premier</div>
     </div>
-  </li>
-  {% endfor %}
-</ul>
+  </div>
+  <ul class="tasks priority-list">
+    {% for t in priority_tasks %}
+    <li class="task priority-card">
+      <form method="POST" action="{{ url_for('employee_done', token=token, tid=t.id) }}">
+        <button type="submit" class="check priority-check" aria-label="Marquer comme fait">⬜</button>
+      </form>
+      <div class="task-body">
+        <div class="task-title">{{ t.title }}</div>
+        <div class="task-meta">
+          📍 {{ t.location or '—' }}
+          {% if t.is_waiting %} · prévue le {{ t.due_date|fr_date }}{% endif %}
+          {% if t.delay_days and t.delay_days > 0 %} · <span class="meta-late">🔴 {{ t.delay_days }}j de retard</span>{% endif %}
+        </div>
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
 {% endif %}
 
 {% if transfers %}
