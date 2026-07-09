@@ -289,7 +289,7 @@ def employee_undo(token, tid):
 @app.route('/e/<token>/calendar')
 def employee_calendar(token):
     require_token(token, 'EMPLOYEE_TOKEN')
-    days, today = _next_days(3)
+    days, today = _next_days(4)
     return render_template('calendar.html',
                            days=days, token=token, today=today,
                            is_admin=False)
@@ -297,11 +297,18 @@ def employee_calendar(token):
 
 # ── Helpers calendrier ────────────────────────────────────────────────────
 def _next_days(n_days):
-    """Renvoie les n prochains jours (à partir d'aujourd'hui) avec leurs tâches.
-    Exclut les tâches récurrentes (recurring_id IS NOT NULL)."""
+    """Renvoie les n prochains jours ouvres (a partir d'aujourd'hui) avec
+    leurs taches. Ignore le vendredi (jour off). Exclut les taches recurrentes."""
     db = get_db()
     today = date.today()
-    end = today + timedelta(days=n_days)
+    # Selectionne les n_days prochains jours en sautant le vendredi (weekday=4)
+    day_dates = []
+    d = today
+    while len(day_dates) < n_days:
+        if d.weekday() != 4:  # 4 = vendredi
+            day_dates.append(d)
+        d = d + timedelta(days=1)
+    end = day_dates[-1] + timedelta(days=1)
     rows = db.execute(
         "SELECT * FROM task WHERE due_date >= ? AND due_date < ? "
         "AND recurring_id IS NULL "
@@ -311,15 +318,14 @@ def _next_days(n_days):
     for r in rows:
         by_day.setdefault(r['due_date'], []).append(dict(r))
     days = []
-    for i in range(n_days):
-        d = today + timedelta(days=i)
+    for d in day_dates:
         days.append({
             'date':     d,
             'iso':      d.isoformat(),
             'label':    fr_long(d),
             'short':    fr_short(d),
             'tasks':    by_day.get(d.isoformat(), []),
-            'is_today': i == 0,
+            'is_today': d == today,
         })
     return days, today
 
@@ -606,7 +612,7 @@ def admin_recurring_skip(token):
 @app.route('/a/<token>/calendar')
 def admin_calendar(token):
     require_token(token, 'ADMIN_TOKEN')
-    days, today = _next_days(3)
+    days, today = _next_days(4)
     return render_template('calendar.html',
                            days=days, token=token, today=today,
                            is_admin=True)
