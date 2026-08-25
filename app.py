@@ -380,18 +380,20 @@ def admin_view(token):
     generate_today_recurring()
     db = get_db()
     td = today_iso()
+    # Les operatrices ne voient pas les taches recurrentes generees
+    rec_filter = ' AND recurring_id IS NULL' if role == 'operator' else ''
     overdue = _enrich(db.execute(
-        'SELECT * FROM task WHERE done_at IS NULL AND due_date<? AND is_transfer=0 '
-        'ORDER BY priority DESC, due_date ASC', (td,)).fetchall())
+        'SELECT * FROM task WHERE done_at IS NULL AND due_date<? AND is_transfer=0'
+        + rec_filter + ' ORDER BY priority DESC, due_date ASC', (td,)).fetchall())
     today_tasks = _enrich(db.execute(
-        'SELECT * FROM task WHERE done_at IS NULL AND due_date=? AND is_transfer=0 '
-        'ORDER BY priority DESC, id ASC', (td,)).fetchall())
+        'SELECT * FROM task WHERE done_at IS NULL AND due_date=? AND is_transfer=0'
+        + rec_filter + ' ORDER BY priority DESC, id ASC', (td,)).fetchall())
     upcoming = _enrich(db.execute(
-        'SELECT * FROM task WHERE done_at IS NULL AND due_date>? AND is_transfer=0 '
-        'ORDER BY due_date ASC LIMIT 50', (td,)).fetchall())
+        'SELECT * FROM task WHERE done_at IS NULL AND due_date>? AND is_transfer=0'
+        + rec_filter + ' ORDER BY due_date ASC LIMIT 50', (td,)).fetchall())
     transfers = _enrich(db.execute(
-        'SELECT * FROM task WHERE done_at IS NULL AND is_transfer=1 '
-        'ORDER BY due_date ASC, id ASC').fetchall())
+        'SELECT * FROM task WHERE done_at IS NULL AND is_transfer=1'
+        + rec_filter + ' ORDER BY due_date ASC, id ASC').fetchall())
     # Pour les operatrices : liste de leurs demandes recemment faites
     # (barrees, elles disparaissent apres 2 jours grace a purge_old_history)
     my_done = []
