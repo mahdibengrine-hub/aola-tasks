@@ -121,6 +121,8 @@ def init_db():
         db.execute('ALTER TABLE task ADD COLUMN is_transfer INTEGER NOT NULL DEFAULT 0')
     if 'transfer_number' not in task_cols:
         db.execute('ALTER TABLE task ADD COLUMN transfer_number TEXT')
+    if 'created_by' not in task_cols:
+        db.execute('ALTER TABLE task ADD COLUMN created_by TEXT')
 
     rec_cols = colset('recurring')
     if 'priority' not in rec_cols:
@@ -167,7 +169,8 @@ def require_admin_or_operator(token):
 
 @app.context_processor
 def inject_role():
-    return {'current_role': getattr(g, 'role', None)}
+    return {'current_role': getattr(g, 'role', None),
+            'creator_label': creator_label}
 
 
 def purge_old_history():
@@ -207,6 +210,13 @@ def generate_today_recurring():
             (r['title'], td, td, r['id'], td,
              r['priority'] or 0, r['location'], now_iso()))
     db.commit()
+
+
+CREATOR_LABEL = {'admin': 'Mehdi', 'operator': 'Equipe Bureau'}
+
+
+def creator_label(code):
+    return CREATOR_LABEL.get(code)
 
 
 def normalize_location(loc):
@@ -382,11 +392,19 @@ def admin_view(token):
     transfers = _enrich(db.execute(
         'SELECT * FROM task WHERE done_at IS NULL AND is_transfer=1 '
         'ORDER BY due_date ASC, id ASC').fetchall())
+    # Pour les operatrices : liste de leurs demandes recemment faites
+    # (barrees, elles disparaissent apres 2 jours grace a purge_old_history)
+    my_done = []
+    if role == 'operator':
+        my_done = db.execute(
+            "SELECT * FROM task WHERE created_by='operator' AND done_at IS NOT NULL "
+            "ORDER BY done_at DESC LIMIT 20").fetchall()
     return render_template('admin.html',
                            overdue=overdue,
                            today_tasks=today_tasks,
                            upcoming=upcoming,
                            transfers=transfers,
+                           my_done=my_done,
                            token=token,
                            today=td,
                            today_label=fr_long(date.today()),
@@ -415,9 +433,10 @@ def admin_add(token):
     db = get_db()
     db.execute(
         'INSERT INTO task(title, due_date, original_due_date, priority, location, '
-        'is_transfer, transfer_number, created_at) '
-        'VALUES (?,?,?,?,?,?,?,?)',
-        (title, due, due, priority, location, is_transfer, transfer_no, now_iso()))
+        'is_transfer, transfer_number, created_by, created_at) '
+        'VALUES (?,?,?,?,?,?,?,?,?)',
+        (title, due, due, priority, location, is_transfer, transfer_no,
+         role, now_iso()))
     db.commit()
     return redirect(url_for('admin_view', token=token))
 

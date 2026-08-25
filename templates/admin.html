@@ -73,4 +73,24 @@
   {% for t in upcoming %}{% include "_admin_task.html" %}{% endfor %}
 </ul>
 {% endif %}
+
+{% if current_role == 'operator' and my_done %}
+<h2 class="section-title">✅ Tes demandes traitées ({{ my_done|length }})</h2>
+<ul class="tasks done">
+  {% for t in my_done %}
+  <li class="task">
+    <div class="task-body">
+      <div class="task-title strike">{{ t.title }}</div>
+      <div class="task-meta">
+        {% if t.location %}📍 {{ t.location }} · {% endif %}
+        faite le {{ t.done_at[:10]|fr_date }} à {{ t.done_at[11:16] }}
+      </div>
+    </div>
+  </li>
+  {% endfor %}
+</ul>
+<div class="empty soft" style="margin-top:8px;font-size:12px">
+  Historique limité aux 2 derniers jours.
+</div>
+{% endif %}
 {% endblock %}

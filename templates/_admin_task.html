@@ -8,6 +8,7 @@
         <div class="task-meta">
           {% if t.location %}📍 {{ t.location }}{% endif %}
           {% if t.due_date %}{% if t.location %} · {% endif %}{{ t.due_date|fr_date }}{% endif %}
+          {% if creator_label(t.created_by) %} · par <strong>{{ creator_label(t.created_by) }}</strong>{% endif %}
           {% if t.recurring_id %} · récurrente{% endif %}
         </div>
       </summary>
