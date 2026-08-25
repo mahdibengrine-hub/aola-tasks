@@ -150,6 +150,26 @@ def require_token(token, env_key):
         abort(404)
 
 
+def require_admin_or_operator(token):
+    """Renvoie 'admin' ou 'operator' selon le token, 404 sinon.
+    Stocke aussi le role dans g pour les templates."""
+    t = (token or '').strip()
+    admin_tok = _env('ADMIN_TOKEN', '')
+    op_tok    = _env('OPERATOR_TOKEN', '')
+    if t and t == admin_tok:
+        g.role = 'admin'
+        return 'admin'
+    if t and op_tok and t == op_tok:
+        g.role = 'operator'
+        return 'operator'
+    abort(404)
+
+
+@app.context_processor
+def inject_role():
+    return {'current_role': getattr(g, 'role', None)}
+
+
 def purge_old_history():
     """Supprime les taches faites il y a plus de 2 jours pour alleger la DB.
     Hier et avant-hier sont conserves (utilises dans Suivi)."""
@@ -346,7 +366,7 @@ def _enrich(rows):
 
 @app.route('/a/<token>/')
 def admin_view(token):
-    require_token(token, 'ADMIN_TOKEN')
+    role = require_admin_or_operator(token)
     generate_today_recurring()
     db = get_db()
     td = today_iso()
@@ -376,7 +396,7 @@ def admin_view(token):
 
 @app.route('/a/<token>/add', methods=['POST'])
 def admin_add(token):
-    require_token(token, 'ADMIN_TOKEN')
+    role = require_admin_or_operator(token)
     title       = (request.form.get('title') or '').strip()
     due         = (request.form.get('due_date') or '').strip()
     priority    = 1 if request.form.get('priority') else 0
@@ -406,7 +426,7 @@ def admin_add(token):
 def admin_postpone(token, tid):
     """Reporte une tache a une nouvelle date sans toucher original_due_date.
     Permet d'afficher 'X jours de retard' meme apres report."""
-    require_token(token, 'ADMIN_TOKEN')
+    role = require_admin_or_operator(token)
     new_date = (request.form.get('new_date') or '').strip()
     if not new_date:
         flash("Choisis une date avant de reporter.", 'error')
@@ -434,7 +454,7 @@ def admin_postpone(token, tid):
 def admin_clear_today(token):
     """Supprime toutes les tâches du jour, qu'elles soient récurrentes ou ad-hoc.
     Concerne uniquement les tâches non-encore-faites pour le jour courant."""
-    require_token(token, 'ADMIN_TOKEN')
+    role = require_admin_or_operator(token)
     db = get_db()
     td = today_iso()
     db.execute(
@@ -446,7 +466,7 @@ def admin_clear_today(token):
 @app.route('/a/<token>/clear-overdue', methods=['POST'])
 def admin_clear_overdue(token):
     """Supprime toutes les tâches en retard non-faites (due_date < today)."""
-    require_token(token, 'ADMIN_TOKEN')
+    role = require_admin_or_operator(token)
     db = get_db()
     td = today_iso()
     db.execute(
@@ -457,7 +477,7 @@ def admin_clear_overdue(token):
 
 @app.route('/a/<token>/del/<int:tid>', methods=['POST'])
 def admin_delete(token, tid):
-    require_token(token, 'ADMIN_TOKEN')
+    role = require_admin_or_operator(token)
     db = get_db()
     db.execute('DELETE FROM task WHERE id=?', (tid,))
     db.commit()
@@ -466,7 +486,7 @@ def admin_delete(token, tid):
 
 @app.route('/a/<token>/edit/<int:tid>', methods=['POST'])
 def admin_edit(token, tid):
-    require_token(token, 'ADMIN_TOKEN')
+    role = require_admin_or_operator(token)
     title    = (request.form.get('title') or '').strip()
     due      = (request.form.get('due_date') or '').strip() or None
     priority = 1 if request.form.get('priority') else 0
@@ -505,7 +525,7 @@ def admin_edit(token, tid):
 # ── Récurrentes (onglet dédié) ────────────────────────────────────────────
 @app.route('/a/<token>/recurring')
 def admin_recurring(token):
-    require_token(token, 'ADMIN_TOKEN')
+    role = require_admin_or_operator(token)
     db = get_db()
     td = today_iso()
     recurring = db.execute(
@@ -524,7 +544,7 @@ def admin_recurring(token):
 
 @app.route('/a/<token>/recurring/add', methods=['POST'])
 def admin_recurring_add(token):
-    require_token(token, 'ADMIN_TOKEN')
+    role = require_admin_or_operator(token)
     title    = (request.form.get('title') or '').strip()
     days     = request.form.getlist('days')
     priority = 1 if request.form.get('priority') else 0
@@ -543,7 +563,7 @@ def admin_recurring_add(token):
 
 @app.route('/a/<token>/recurring/edit/<int:rid>', methods=['POST'])
 def admin_recurring_edit(token, rid):
-    require_token(token, 'ADMIN_TOKEN')
+    role = require_admin_or_operator(token)
     title    = (request.form.get('title') or '').strip()
     days     = request.form.getlist('days')
     priority = 1 if request.form.get('priority') else 0
@@ -561,7 +581,7 @@ def admin_recurring_edit(token, rid):
 
 @app.route('/a/<token>/recurring/toggle/<int:rid>', methods=['POST'])
 def admin_recurring_toggle(token, rid):
-    require_token(token, 'ADMIN_TOKEN')
+    role = require_admin_or_operator(token)
     db = get_db()
     db.execute('UPDATE recurring SET active = 1 - active WHERE id=?', (rid,))
     db.commit()
@@ -570,7 +590,7 @@ def admin_recurring_toggle(token, rid):
 
 @app.route('/a/<token>/recurring/del/<int:rid>', methods=['POST'])
 def admin_recurring_delete(token, rid):
-    require_token(token, 'ADMIN_TOKEN')
+    role = require_admin_or_operator(token)
     db = get_db()
     db.execute('DELETE FROM recurring WHERE id=?', (rid,))
     db.execute('DELETE FROM recurring_skip WHERE recurring_id=?', (rid,))
@@ -582,7 +602,7 @@ def admin_recurring_delete(token, rid):
 def admin_recurring_skip(token):
     """Pose un 'skip' pour 1 jour donné (ex. employé en congés).
     Si la récurrente est déjà skippée pour ce jour, on lève le skip."""
-    require_token(token, 'ADMIN_TOKEN')
+    role = require_admin_or_operator(token)
     rid       = int(request.form.get('rid'))
     skip_date = (request.form.get('skip_date') or '').strip()
     if not skip_date:
@@ -611,7 +631,7 @@ def admin_recurring_skip(token):
 # ── Calendrier admin ──────────────────────────────────────────────────────
 @app.route('/a/<token>/calendar')
 def admin_calendar(token):
-    require_token(token, 'ADMIN_TOKEN')
+    role = require_admin_or_operator(token)
     days, today = _next_days(4)
     return render_template('calendar.html',
                            days=days, token=token, today=today,
@@ -621,7 +641,9 @@ def admin_calendar(token):
 # ── Suivi ─────────────────────────────────────────────────────────────────
 @app.route('/a/<token>/follow')
 def admin_follow(token):
-    require_token(token, 'ADMIN_TOKEN')
+    role = require_admin_or_operator(token)
+    if role != 'admin':
+        abort(404)
     db = get_db()
     today = date.today()
     td = today.isoformat()
