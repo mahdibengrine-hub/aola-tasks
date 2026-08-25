@@ -526,6 +526,8 @@ def admin_edit(token, tid):
 @app.route('/a/<token>/recurring')
 def admin_recurring(token):
     role = require_admin_or_operator(token)
+    if role != 'admin':
+        abort(404)
     db = get_db()
     td = today_iso()
     recurring = db.execute(
@@ -545,6 +547,8 @@ def admin_recurring(token):
 @app.route('/a/<token>/recurring/add', methods=['POST'])
 def admin_recurring_add(token):
     role = require_admin_or_operator(token)
+    if role != 'admin':
+        abort(404)
     title    = (request.form.get('title') or '').strip()
     days     = request.form.getlist('days')
     priority = 1 if request.form.get('priority') else 0
@@ -564,6 +568,8 @@ def admin_recurring_add(token):
 @app.route('/a/<token>/recurring/edit/<int:rid>', methods=['POST'])
 def admin_recurring_edit(token, rid):
     role = require_admin_or_operator(token)
+    if role != 'admin':
+        abort(404)
     title    = (request.form.get('title') or '').strip()
     days     = request.form.getlist('days')
     priority = 1 if request.form.get('priority') else 0
@@ -582,6 +588,8 @@ def admin_recurring_edit(token, rid):
 @app.route('/a/<token>/recurring/toggle/<int:rid>', methods=['POST'])
 def admin_recurring_toggle(token, rid):
     role = require_admin_or_operator(token)
+    if role != 'admin':
+        abort(404)
     db = get_db()
     db.execute('UPDATE recurring SET active = 1 - active WHERE id=?', (rid,))
     db.commit()
@@ -591,6 +599,8 @@ def admin_recurring_toggle(token, rid):
 @app.route('/a/<token>/recurring/del/<int:rid>', methods=['POST'])
 def admin_recurring_delete(token, rid):
     role = require_admin_or_operator(token)
+    if role != 'admin':
+        abort(404)
     db = get_db()
     db.execute('DELETE FROM recurring WHERE id=?', (rid,))
     db.execute('DELETE FROM recurring_skip WHERE recurring_id=?', (rid,))
@@ -603,6 +613,8 @@ def admin_recurring_skip(token):
     """Pose un 'skip' pour 1 jour donné (ex. employé en congés).
     Si la récurrente est déjà skippée pour ce jour, on lève le skip."""
     role = require_admin_or_operator(token)
+    if role != 'admin':
+        abort(404)
     rid       = int(request.form.get('rid'))
     skip_date = (request.form.get('skip_date') or '').strip()
     if not skip_date:
