@@ -4,3 +4,6 @@
 <a href="{{ url_for('employee_calendar', token=token) }}" class="{% if request.endpoint=='employee_calendar' %}active{% endif %}">
   <span class="ico">📅</span><span class="lbl">Calendrier</span>
 </a>
+<a href="{{ url_for('employee_expenses', token=token) }}" class="{% if request.endpoint=='employee_expenses' %}active{% endif %}">
+  <span class="ico">💸</span><span class="lbl">Dépenses</span>
+</a>

@@ -91,6 +91,18 @@ def init_db():
       created_at TEXT NOT NULL,
       FOREIGN KEY (recurring_id) REFERENCES recurring(id) ON DELETE SET NULL
     );
+    CREATE TABLE IF NOT EXISTS expense (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      date TEXT NOT NULL,
+      activity TEXT NOT NULL,
+      amount REAL NOT NULL,
+      settled INTEGER NOT NULL DEFAULT 0,
+      settled_at TEXT,
+      created_by TEXT,
+      created_at TEXT NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_expense_date ON expense(date);
+    CREATE INDEX IF NOT EXISTS idx_expense_settled ON expense(settled);
     CREATE TABLE IF NOT EXISTS recurring_skip (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       recurring_id INTEGER NOT NULL,
@@ -734,6 +746,105 @@ def admin_follow(token):
                            token=token,
                            today=td,
                            today_label=fr_long(today).capitalize())
+
+
+# ── Depenses ──────────────────────────────────────────────────────────────
+def _fetch_expenses(db):
+    rows = db.execute(
+        'SELECT * FROM expense ORDER BY settled ASC, date DESC, id DESC').fetchall()
+    total_open = sum(r['amount'] for r in rows if not r['settled'])
+    return rows, total_open
+
+
+def _parse_amount(s):
+    try:
+        return float((s or '').replace(',', '.').strip())
+    except Exception:
+        return None
+
+
+@app.route('/e/<token>/expenses')
+def employee_expenses(token):
+    require_token(token, 'EMPLOYEE_TOKEN')
+    expenses, total_open = _fetch_expenses(get_db())
+    return render_template('expenses.html',
+                           expenses=expenses, total_open=total_open,
+                           token=token, today=today_iso(),
+                           readonly=False, is_admin=False)
+
+
+@app.route('/e/<token>/expenses/add', methods=['POST'])
+def employee_expense_add(token):
+    require_token(token, 'EMPLOYEE_TOKEN')
+    d   = (request.form.get('date') or '').strip()
+    act = (request.form.get('activity') or '').strip()
+    amt = _parse_amount(request.form.get('amount'))
+    if not d or not act or amt is None or amt <= 0:
+        flash("Renseigne date, activité et montant.", 'error')
+        return redirect(url_for('employee_expenses', token=token))
+    db = get_db()
+    db.execute(
+        'INSERT INTO expense(date, activity, amount, created_by, created_at) '
+        'VALUES (?,?,?,?,?)',
+        (d, act, amt, 'employee', now_iso()))
+    db.commit()
+    flash("Dépense ajoutée.", 'success')
+    return redirect(url_for('employee_expenses', token=token))
+
+
+@app.route('/e/<token>/expenses/edit/<int:eid>', methods=['POST'])
+def employee_expense_edit(token, eid):
+    require_token(token, 'EMPLOYEE_TOKEN')
+    d   = (request.form.get('date') or '').strip()
+    act = (request.form.get('activity') or '').strip()
+    amt = _parse_amount(request.form.get('amount'))
+    db = get_db()
+    existing = db.execute('SELECT date, activity, amount FROM expense WHERE id=?', (eid,)).fetchone()
+    if not existing:
+        return redirect(url_for('employee_expenses', token=token))
+    if not d: d = existing['date']
+    if not act: act = existing['activity']
+    if amt is None or amt <= 0: amt = existing['amount']
+    db.execute('UPDATE expense SET date=?, activity=?, amount=? WHERE id=?',
+               (d, act, amt, eid))
+    db.commit()
+    flash("Dépense modifiée.", 'success')
+    return redirect(url_for('employee_expenses', token=token))
+
+
+@app.route('/e/<token>/expenses/del/<int:eid>', methods=['POST'])
+def employee_expense_delete(token, eid):
+    require_token(token, 'EMPLOYEE_TOKEN')
+    db = get_db()
+    db.execute('DELETE FROM expense WHERE id=?', (eid,))
+    db.commit()
+    return redirect(url_for('employee_expenses', token=token))
+
+
+@app.route('/e/<token>/expenses/settle/<int:eid>', methods=['POST'])
+def employee_expense_settle(token, eid):
+    require_token(token, 'EMPLOYEE_TOKEN')
+    db = get_db()
+    row = db.execute('SELECT settled FROM expense WHERE id=?', (eid,)).fetchone()
+    if not row:
+        return redirect(url_for('employee_expenses', token=token))
+    if row['settled']:
+        db.execute('UPDATE expense SET settled=0, settled_at=NULL WHERE id=?', (eid,))
+    else:
+        db.execute('UPDATE expense SET settled=1, settled_at=? WHERE id=?',
+                   (now_iso(), eid))
+    db.commit()
+    return redirect(url_for('employee_expenses', token=token))
+
+
+@app.route('/a/<token>/expenses')
+def admin_expenses(token):
+    role = require_admin_or_operator(token)
+    expenses, total_open = _fetch_expenses(get_db())
+    return render_template('expenses.html',
+                           expenses=expenses, total_open=total_open,
+                           token=token, today=today_iso(),
+                           readonly=True, is_admin=True)
 
 
 # ── Landing ───────────────────────────────────────────────────────────────

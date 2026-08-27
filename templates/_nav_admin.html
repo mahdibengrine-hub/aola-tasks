@@ -14,3 +14,8 @@
 <a href="{{ url_for('admin_calendar', token=token) }}" class="{% if request.endpoint=='admin_calendar' %}active{% endif %}">
   <span class="ico">📅</span><span class="lbl">Calendrier</span>
 </a>
+{% if current_role == 'admin' %}
+<a href="{{ url_for('admin_expenses', token=token) }}" class="{% if request.endpoint=='admin_expenses' %}active{% endif %}">
+  <span class="ico">💸</span><span class="lbl">Dépenses</span>
+</a>
+{% endif %}

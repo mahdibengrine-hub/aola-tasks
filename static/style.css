@@ -86,6 +86,12 @@ a{color:var(--teal-dark);text-decoration:none}
   background:linear-gradient(135deg, rgba(124,58,237,.12), rgba(217,70,239,.12));
   border-color:#a855f7;color:#7c3aed}
 
+/* ── Depenses ───────────────────────────────────────── */
+.expense-line{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.expense-amount{font-weight:800;font-size:16px;color:var(--teal-deep);
+  white-space:nowrap;font-variant-numeric:tabular-nums}
+.expense-amount.strike{text-decoration:line-through;color:var(--muted);font-weight:600}
+
 /* ── Topbar ─────────────────────────────────────────── */
 .topbar{display:flex;align-items:center;justify-content:space-between;
   padding:18px 20px;background:#fff;

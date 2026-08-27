@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block title %} — Dépenses{% endblock %}
+{% block topnav %}
+{% if is_admin %}{% include '_nav_admin.html' %}{% else %}{% include '_nav_employee.html' %}{% endif %}
+{% endblock %}
+{% block bottomnav %}
+{% if is_admin %}{% include '_nav_admin.html' %}{% else %}{% include '_nav_employee.html' %}{% endif %}
+{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="hero-date">Dépenses</div>
+  <div class="hero-title">💸 {{ '{:,.0f}'.format(total_open).replace(',', ' ') }} DZD</div>
+  <div class="hero-sub" style="color:var(--muted);font-size:13px;margin-top:6px">
+    Non soldées · {{ expenses|selectattr('settled','equalto',0)|list|length }} ligne(s)
+  </div>
+</section>
+
+{% if not readonly %}
+<div class="card">
+  <div class="card-h">➕ Nouvelle dépense</div>
+  <form method="POST" action="{{ url_for('employee_expense_add', token=token) }}" class="col">
+    <div class="field">
+      <div class="form-label">Date</div>
+      <input type="date" name="date" value="{{ today }}" required>
+    </div>
+    <div class="field">
+      <div class="form-label">Activité</div>
+      <input name="activity" placeholder="Ex. Carton, sac Yalidine, essence…" required>
+    </div>
+    <div class="field">
+      <div class="form-label">Montant (DZD)</div>
+      <input type="text" inputmode="decimal" name="amount" placeholder="Ex. 1500" required>
+    </div>
+    <button type="submit" class="btn-primary">Ajouter</button>
+  </form>
+</div>
+{% endif %}
+
+{% set open_ones = expenses|selectattr('settled','equalto',0)|list %}
+{% set done_ones = expenses|selectattr('settled','equalto',1)|list %}
+
+<h2 class="section-title">Non soldées ({{ open_ones|length }})</h2>
+{% if open_ones %}
+<ul class="tasks">
+  {% for e in open_ones %}
+  <li class="task expense-item">
+    <div class="task-body">
+      {% if readonly %}
+      <div class="expense-line">
+        <div>
+          <div class="task-title">{{ e.activity }}</div>
+          <div class="task-meta">{{ e.date|fr_date }}</div>
+        </div>
+        <div class="expense-amount">{{ '{:,.0f}'.format(e.amount).replace(',', ' ') }} DZD</div>
+      </div>
+      {% else %}
+      <details>
+        <summary>
+          <div class="expense-line">
+            <div>
+              <div class="task-title">{{ e.activity }}</div>
+              <div class="task-meta">{{ e.date|fr_date }}</div>
+            </div>
+            <div class="expense-amount">{{ '{:,.0f}'.format(e.amount).replace(',', ' ') }} DZD</div>
+          </div>
+        </summary>
+        <form method="POST" action="{{ url_for('employee_expense_edit', token=token, eid=e.id) }}" class="col" style="margin-top:12px">
+          <input type="date" name="date" value="{{ e.date }}" required>
+          <input name="activity" value="{{ e.activity }}" required>
+          <input type="text" inputmode="decimal" name="amount" value="{{ e.amount|round(0)|int }}" required>
+          <button type="submit" class="btn-ghost">Enregistrer</button>
+        </form>
+        <div class="row" style="margin-top:10px;gap:8px">
+          <form method="POST" action="{{ url_for('employee_expense_settle', token=token, eid=e.id) }}" style="flex:1">
+            <button type="submit" class="btn-primary" style="width:100%">✓ Solder</button>
+          </form>
+          <form method="POST" action="{{ url_for('employee_expense_delete', token=token, eid=e.id) }}"
+                onsubmit="return confirm('Supprimer cette dépense ?')" style="flex:0 0 auto">
+            <button type="submit" class="btn-danger">Suppr</button>
+          </form>
+        </div>
+      </details>
+      {% endif %}
+    </div>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<div class="empty soft">Liste vide.</div>
+{% endif %}
+
+{% if done_ones %}
+<h2 class="section-title">✅ Soldées ({{ done_ones|length }})</h2>
+<ul class="tasks done">
+  {% for e in done_ones %}
+  <li class="task expense-item">
+    <div class="task-body">
+      <div class="expense-line">
+        <div>
+          <div class="task-title strike">{{ e.activity }}</div>
+          <div class="task-meta">
+            {{ e.date|fr_date }}{% if e.settled_at %} · soldée le {{ e.settled_at[:10]|fr_date }}{% endif %}
+          </div>
+        </div>
+        <div class="expense-amount strike">{{ '{:,.0f}'.format(e.amount).replace(',', ' ') }} DZD</div>
+      </div>
+      {% if not readonly %}
+      <div class="row" style="margin-top:10px;gap:8px">
+        <form method="POST" action="{{ url_for('employee_expense_settle', token=token, eid=e.id) }}" style="flex:1">
+          <button type="submit" class="btn-ghost" style="width:100%">↺ Marquer non soldée</button>
+        </form>
+        <form method="POST" action="{{ url_for('employee_expense_delete', token=token, eid=e.id) }}"
+              onsubmit="return confirm('Supprimer cette dépense ?')" style="flex:0 0 auto">
+          <button type="submit" class="btn-danger">Suppr</button>
+        </form>
+      </div>
+      {% endif %}
+    </div>
+  </li>
+  {% endfor %}
+</ul>
+{% endif %}
+{% endblock %}
