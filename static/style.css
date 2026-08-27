@@ -92,6 +92,15 @@ a{color:var(--teal-dark);text-decoration:none}
   white-space:nowrap;font-variant-numeric:tabular-nums}
 .expense-amount.strike{text-decoration:line-through;color:var(--muted);font-weight:600}
 
+.btn-settle-all{width:100%;padding:16px 20px;font-size:16px;font-weight:800;
+  background:linear-gradient(135deg, var(--green) 0%, var(--teal) 100%);
+  color:#fff;border:none;border-radius:16px;letter-spacing:.3px;
+  box-shadow:0 6px 20px rgba(15,157,106,.35), 0 2px 6px rgba(20,184,166,.2);
+  cursor:pointer;transition:transform .12s,box-shadow .15s}
+.btn-settle-all:hover{transform:translateY(-1px);
+  box-shadow:0 10px 28px rgba(15,157,106,.45), 0 4px 10px rgba(20,184,166,.3)}
+.btn-settle-all:active{transform:scale(.98)}
+
 /* ── Topbar ─────────────────────────────────────────── */
 .topbar{display:flex;align-items:center;justify-content:space-between;
   padding:18px 20px;background:#fff;

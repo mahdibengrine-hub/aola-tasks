@@ -821,6 +821,19 @@ def employee_expense_delete(token, eid):
     return redirect(url_for('employee_expenses', token=token))
 
 
+@app.route('/e/<token>/expenses/settle-all', methods=['POST'])
+def employee_expense_settle_all(token):
+    require_token(token, 'EMPLOYEE_TOKEN')
+    db = get_db()
+    n = db.execute(
+        'UPDATE expense SET settled=1, settled_at=? WHERE settled=0',
+        (now_iso(),)).rowcount
+    db.commit()
+    if n:
+        flash(f"{n} dépense{'s' if n>1 else ''} soldée{'s' if n>1 else ''}.", 'success')
+    return redirect(url_for('employee_expenses', token=token))
+
+
 @app.route('/e/<token>/expenses/settle/<int:eid>', methods=['POST'])
 def employee_expense_settle(token, eid):
     require_token(token, 'EMPLOYEE_TOKEN')

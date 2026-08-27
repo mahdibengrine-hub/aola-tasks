@@ -39,6 +39,14 @@
 {% set open_ones = expenses|selectattr('settled','equalto',0)|list %}
 {% set done_ones = expenses|selectattr('settled','equalto',1)|list %}
 
+{% if not readonly and open_ones %}
+<form method="POST" action="{{ url_for('employee_expense_settle_all', token=token) }}"
+      onsubmit="return confirm('Marquer toutes les dépenses non soldées comme soldées ?');"
+      style="margin-bottom:16px">
+  <button type="submit" class="btn-settle-all">✨ Solder tout</button>
+</form>
+{% endif %}
+
 <h2 class="section-title">Non soldées ({{ open_ones|length }})</h2>
 {% if open_ones %}
 <ul class="tasks">
@@ -68,11 +76,11 @@
           <input type="date" name="date" value="{{ e.date }}" required>
           <input name="activity" value="{{ e.activity }}" required>
           <input type="text" inputmode="decimal" name="amount" value="{{ e.amount|round(0)|int }}" required>
-          <button type="submit" class="btn-ghost">Enregistrer</button>
+          <button type="submit" class="btn-primary">Enregistrer</button>
         </form>
         <div class="row" style="margin-top:10px;gap:8px">
           <form method="POST" action="{{ url_for('employee_expense_settle', token=token, eid=e.id) }}" style="flex:1">
-            <button type="submit" class="btn-primary" style="width:100%">✓ Solder</button>
+            <button type="submit" class="btn-ghost" style="width:100%">✓ Solder</button>
           </form>
           <form method="POST" action="{{ url_for('employee_expense_delete', token=token, eid=e.id) }}"
                 onsubmit="return confirm('Supprimer cette dépense ?')" style="flex:0 0 auto">
