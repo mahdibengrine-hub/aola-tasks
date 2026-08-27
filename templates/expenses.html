@@ -15,6 +15,34 @@
   </div>
 </section>
 
+{% if readonly and anomalies %}
+<div class="alert-block">
+  <div class="alert-title">⚠️ {{ anomalies|length }} anomalie{{ 's' if anomalies|length > 1 else '' }} détectée{{ 's' if anomalies|length > 1 else '' }}</div>
+  <ul>
+    {% for a in anomalies %}
+    <li class="alert-line alert-{{ a.level }}">{{ a.msg }}</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+{% if readonly %}
+<div class="stats" style="margin-bottom:16px">
+  <div class="stat">
+    <div class="stat-value">{{ '{:,.0f}'.format(total_open).replace(',', ' ') }}</div>
+    <div class="stat-label">Non soldées</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value">{{ '{:,.0f}'.format(total_settled).replace(',', ' ') }}</div>
+    <div class="stat-label">Soldées</div>
+  </div>
+  <div class="stat highlight">
+    <div class="stat-value">{{ '{:,.0f}'.format(total_all).replace(',', ' ') }}</div>
+    <div class="stat-label">Total (DZD)</div>
+  </div>
+</div>
+{% endif %}
+
 {% if not readonly %}
 <div class="card">
   <div class="card-h">➕ Nouvelle dépense</div>
@@ -95,6 +123,16 @@
 </ul>
 {% else %}
 <div class="empty soft">Liste vide.</div>
+{% endif %}
+
+{% if not readonly and expenses %}
+<div class="danger-zone">
+  <div class="danger-title">Zone de vidange</div>
+  <form method="POST" action="{{ url_for('employee_expense_delete_all', token=token) }}"
+        onsubmit="return confirm('⚠️ Supprimer TOUTES les dépenses (soldées et non soldées) ? Cette action est irréversible.');">
+    <button type="submit" class="btn-wipe">🗑️ Supprimer tout</button>
+  </form>
+</div>
 {% endif %}
 
 {% if done_ones %}

@@ -392,20 +392,23 @@ def admin_view(token):
     generate_today_recurring()
     db = get_db()
     td = today_iso()
-    # Les operatrices ne voient pas les taches recurrentes generees
-    rec_filter = ' AND recurring_id IS NULL' if role == 'operator' else ''
+    # Les operatrices ne voient que leurs propres saisies (pas recurrentes, pas admin)
+    if role == 'operator':
+        role_filter = " AND recurring_id IS NULL AND created_by='operator'"
+    else:
+        role_filter = ''
     overdue = _enrich(db.execute(
         'SELECT * FROM task WHERE done_at IS NULL AND due_date<? AND is_transfer=0'
-        + rec_filter + ' ORDER BY priority DESC, due_date ASC', (td,)).fetchall())
+        + role_filter + ' ORDER BY priority DESC, due_date ASC', (td,)).fetchall())
     today_tasks = _enrich(db.execute(
         'SELECT * FROM task WHERE done_at IS NULL AND due_date=? AND is_transfer=0'
-        + rec_filter + ' ORDER BY priority DESC, id ASC', (td,)).fetchall())
+        + role_filter + ' ORDER BY priority DESC, id ASC', (td,)).fetchall())
     upcoming = _enrich(db.execute(
         'SELECT * FROM task WHERE done_at IS NULL AND due_date>? AND is_transfer=0'
-        + rec_filter + ' ORDER BY due_date ASC LIMIT 50', (td,)).fetchall())
+        + role_filter + ' ORDER BY due_date ASC LIMIT 50', (td,)).fetchall())
     transfers = _enrich(db.execute(
         'SELECT * FROM task WHERE done_at IS NULL AND is_transfer=1'
-        + rec_filter + ' ORDER BY due_date ASC, id ASC').fetchall())
+        + role_filter + ' ORDER BY due_date ASC, id ASC').fetchall())
     # Pour les operatrices : liste de leurs demandes recemment faites
     # (barrees, elles disparaissent apres 2 jours grace a purge_old_history)
     my_done = []
@@ -821,6 +824,17 @@ def employee_expense_delete(token, eid):
     return redirect(url_for('employee_expenses', token=token))
 
 
+@app.route('/e/<token>/expenses/delete-all', methods=['POST'])
+def employee_expense_delete_all(token):
+    require_token(token, 'EMPLOYEE_TOKEN')
+    db = get_db()
+    n = db.execute('DELETE FROM expense').rowcount
+    db.commit()
+    if n:
+        flash(f"{n} dépense{'s' if n>1 else ''} supprimée{'s' if n>1 else ''}.", 'success')
+    return redirect(url_for('employee_expenses', token=token))
+
+
 @app.route('/e/<token>/expenses/settle-all', methods=['POST'])
 def employee_expense_settle_all(token):
     require_token(token, 'EMPLOYEE_TOKEN')
@@ -850,12 +864,50 @@ def employee_expense_settle(token, eid):
     return redirect(url_for('employee_expenses', token=token))
 
 
+def _detect_expense_anomalies(expenses):
+    """Detecte les anomalies critiques dans les depenses (outil sensible)."""
+    anomalies = []
+    td = today_iso()
+    for e in expenses:
+        act = (e['activity'] or '').strip()
+        amt = e['amount']
+        if amt is None or amt <= 0:
+            anomalies.append({
+                'level': 'danger',
+                'msg': f"Ligne #{e['id']} — montant nul ou négatif ({amt})"})
+        elif amt > 100000:
+            anomalies.append({
+                'level': 'warning',
+                'msg': f"Ligne #{e['id']} — montant très élevé ({int(amt):,} DZD)".replace(',', ' ')
+                        + f" · {act[:40]}"})
+        if not act:
+            anomalies.append({
+                'level': 'danger',
+                'msg': f"Ligne #{e['id']} — activité vide"})
+        if e['date'] and str(e['date']) > td:
+            anomalies.append({
+                'level': 'warning',
+                'msg': f"Ligne #{e['id']} — date dans le futur ({e['date']})"})
+        if e['settled'] and not e['settled_at']:
+            anomalies.append({
+                'level': 'warning',
+                'msg': f"Ligne #{e['id']} — soldée sans horodatage (donnée incomplète)"})
+    return anomalies
+
+
 @app.route('/a/<token>/expenses')
 def admin_expenses(token):
     role = require_admin_or_operator(token)
-    expenses, total_open = _fetch_expenses(get_db())
+    db = get_db()
+    expenses, total_open = _fetch_expenses(db)
+    anomalies = _detect_expense_anomalies(expenses)
+    # Stats globales
+    total_all      = sum(e['amount'] for e in expenses)
+    total_settled  = sum(e['amount'] for e in expenses if e['settled'])
     return render_template('expenses.html',
                            expenses=expenses, total_open=total_open,
+                           total_all=total_all, total_settled=total_settled,
+                           anomalies=anomalies,
                            token=token, today=today_iso(),
                            readonly=True, is_admin=True)
 
