@@ -26,6 +26,14 @@
 </main>
 <nav class="bottomnav mobile-only">{% block bottomnav %}{% endblock %}</nav>
 <script>
+// Enregistre le Service Worker (offline)
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js', {scope: '/'}).catch(() => {});
+  });
+}
+</script>
+<script>
 // Toggle "Transfert ?" : remplace Titre par N° du transfert et change le label Lieu.
 (function(){
   function sync(form){

@@ -912,6 +912,18 @@ def admin_expenses(token):
                            readonly=True, is_admin=True)
 
 
+# ── Service Worker (sert le fichier depuis / pour un scope large) ─────────
+@app.route('/sw.js')
+def service_worker():
+    from flask import send_from_directory
+    resp = send_from_directory(
+        os.path.join(os.path.dirname(__file__), 'static'),
+        'sw.js', mimetype='application/javascript')
+    resp.headers['Service-Worker-Allowed'] = '/'
+    resp.headers['Cache-Control'] = 'no-cache'
+    return resp
+
+
 # ── Landing ───────────────────────────────────────────────────────────────
 @app.route('/')
 def index():

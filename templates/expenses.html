@@ -75,6 +75,22 @@
 </form>
 {% endif %}
 
+{% if not readonly %}
+<div id="net-status" class="net-status">
+  <div class="net-badge">
+    <span id="net-dot" class="net-dot"></span>
+    <span id="net-label" class="net-label">Vérification…</span>
+  </div>
+  <div id="net-clock" class="net-clock">--:--</div>
+  <div id="net-sub" class="net-sub">Dernière synchro</div>
+</div>
+<div id="net-banner" class="net-banner" hidden></div>
+<div id="pending-block" hidden>
+  <h2 class="section-title" style="color:var(--amber-dark)">⏳ En attente de synchro (<span id="pending-count">0</span>)</h2>
+  <ul id="pending-list" class="tasks"></ul>
+</div>
+{% endif %}
+
 <h2 class="section-title">Non soldées ({{ open_ones|length }})</h2>
 {% if open_ones %}
 <ul class="tasks">
@@ -165,5 +181,149 @@
   </li>
   {% endfor %}
 </ul>
+{% endif %}
+
+{% if not readonly %}
+<script>
+(function(){
+  const TOKEN = "{{ token }}";
+  const ADD_URL = `/e/${TOKEN}/expenses/add`;
+  const KEY = 'aola-pending-expenses';
+
+  function getQ(){ try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch(e){ return []; } }
+  function setQ(list){ localStorage.setItem(KEY, JSON.stringify(list)); }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, c => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[c]));
+  }
+
+  function render(){
+    const list = getQ();
+    const block = document.getElementById('pending-block');
+    const ul = document.getElementById('pending-list');
+    const cnt = document.getElementById('pending-count');
+    if (!block || !ul || !cnt) return;
+    ul.innerHTML = '';
+    if (!list.length){ block.hidden = true; return; }
+    block.hidden = false;
+    cnt.textContent = list.length;
+    list.forEach((it) => {
+      const li = document.createElement('li');
+      li.className = 'task expense-item pending';
+      li.innerHTML = `
+        <div class="task-body">
+          <div class="expense-line">
+            <div>
+              <div class="task-title">⏳ ${escapeHtml(it.activity)}</div>
+              <div class="task-meta">En attente · ${escapeHtml(it.date)}</div>
+            </div>
+            <div class="expense-amount">${escapeHtml(it.amount)} DZD</div>
+          </div>
+        </div>`;
+      ul.appendChild(li);
+    });
+  }
+
+  function banner(msg, type){
+    const el = document.getElementById('net-banner');
+    if (!el) return;
+    el.textContent = msg;
+    el.hidden = false;
+    el.className = 'net-banner net-' + type;
+    if (type === 'success') setTimeout(() => { el.hidden = true; }, 3000);
+  }
+
+  async function drain(){
+    const list = getQ();
+    if (!list.length) return;
+    if (!navigator.onLine){ banner('Hors ligne — synchro en attente du réseau.', 'warn'); return; }
+    const remaining = [];
+    let sent = 0;
+    for (const it of list){
+      try {
+        const fd = new FormData();
+        fd.append('date', it.date);
+        fd.append('activity', it.activity);
+        fd.append('amount', it.amount);
+        const res = await fetch(ADD_URL, {method:'POST', body: fd, credentials:'same-origin'});
+        if (res.ok || res.redirected){ sent++; } else { remaining.push(it); }
+      } catch(e){ remaining.push(it); }
+    }
+    setQ(remaining);
+    if (sent > 0){
+      banner(`${sent} dépense${sent>1?'s':''} synchronisée${sent>1?'s':''} · rechargement…`, 'success');
+      setTimeout(() => location.reload(), 900);
+    } else if (remaining.length){
+      banner('Serveur injoignable — nouvelle tentative auto plus tard.', 'warn');
+      render();
+    }
+  }
+
+  const form = document.querySelector('form[action*="/expenses/add"]');
+  if (form){
+    form.addEventListener('submit', (e) => {
+      if (navigator.onLine) return; // POST HTTP classique
+      e.preventDefault();
+      const fd = new FormData(form);
+      const item = {
+        date: fd.get('date') || '',
+        activity: (fd.get('activity') || '').toString().trim(),
+        amount: (fd.get('amount') || '').toString().trim(),
+      };
+      if (!item.date || !item.activity || !item.amount){
+        banner('Renseigne date, activité et montant.', 'warn');
+        return;
+      }
+      const list = getQ();
+      list.push(item);
+      setQ(list);
+      form.reset();
+      const dateInput = form.querySelector('input[type=date]');
+      if (dateInput) dateInput.value = "{{ today }}";
+      banner('Enregistrée en local · sera envoyée au retour du réseau.', 'success');
+      render();
+    });
+  }
+
+  // ── Status "En ligne" avec heure en gros ────────────────────
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function updateStatus(){
+    const online = navigator.onLine;
+    const box = document.getElementById('net-status');
+    const dot = document.getElementById('net-dot');
+    const lbl = document.getElementById('net-label');
+    const clk = document.getElementById('net-clock');
+    const sub = document.getElementById('net-sub');
+    if (!box) return;
+    const now = new Date();
+    const hhmm = pad(now.getHours()) + ':' + pad(now.getMinutes());
+    if (online){
+      box.classList.remove('offline'); box.classList.add('online');
+      dot.className = 'net-dot online';
+      lbl.textContent = 'En ligne · à jour';
+      clk.textContent = hhmm;
+      sub.textContent = 'Synchro en temps réel';
+    } else {
+      box.classList.remove('online'); box.classList.add('offline');
+      dot.className = 'net-dot offline';
+      lbl.textContent = 'Hors ligne · saisie possible';
+      clk.textContent = hhmm;
+      sub.textContent = 'Envoi au retour du réseau';
+    }
+  }
+
+  window.addEventListener('online',  () => { updateStatus(); banner('Retour en ligne · synchronisation…', 'success'); drain(); });
+  window.addEventListener('offline', () => { updateStatus(); banner('Hors ligne — tu peux quand même saisir.', 'warn'); });
+
+  updateStatus();
+  setInterval(updateStatus, 30000); // rafraîchit l'heure toutes les 30 sec
+
+  render();
+  if (navigator.onLine) drain();
+  else banner('Hors ligne — tu peux quand même saisir.', 'warn');
+})();
+</script>
 {% endif %}
 {% endblock %}
