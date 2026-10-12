@@ -183,6 +183,9 @@
 </ul>
 {% endif %}
 
+{% set history_url = url_for('admin_expenses_history', token=token) if is_admin else url_for('employee_expenses_history', token=token) %}
+<a href="{{ history_url }}" class="history-link">📜 Voir l'historique (30 derniers jours) →</a>
+
 {% if not readonly %}
 <script>
 (function(){

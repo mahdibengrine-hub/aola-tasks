@@ -193,6 +193,12 @@ def purge_old_history():
     db.execute(
         "DELETE FROM task WHERE done_at IS NOT NULL AND date(done_at) < ?",
         (cutoff,))
+    # Purge les depenses de plus de 30 jours (retention 1 mois)
+    exp_cutoff = (date.today() - timedelta(days=30)).isoformat()
+    db.execute(
+        "DELETE FROM expense WHERE date < ? AND "
+        "(settled_at IS NULL OR date(settled_at) < ?)",
+        (exp_cutoff, exp_cutoff))
     db.commit()
 
 
@@ -753,10 +759,24 @@ def admin_follow(token):
 
 # ── Depenses ──────────────────────────────────────────────────────────────
 def _fetch_expenses(db):
+    """Pour la vue principale : non-soldees + soldees d'aujourd'hui seulement."""
+    td = today_iso()
     rows = db.execute(
-        'SELECT * FROM expense ORDER BY settled ASC, date DESC, id DESC').fetchall()
+        "SELECT * FROM expense WHERE settled=0 OR date(settled_at)=? "
+        "ORDER BY settled ASC, date DESC, id DESC", (td,)).fetchall()
     total_open = sum(r['amount'] for r in rows if not r['settled'])
     return rows, total_open
+
+
+def _fetch_history(db, days=30):
+    """Historique complet des depenses sur N jours."""
+    cutoff = (date.today() - timedelta(days=days)).isoformat()
+    rows = db.execute(
+        "SELECT * FROM expense WHERE date >= ? ORDER BY date DESC, id DESC",
+        (cutoff,)).fetchall()
+    return rows
+
+
 
 
 def _parse_amount(s):
@@ -769,10 +789,20 @@ def _parse_amount(s):
 @app.route('/e/<token>/expenses')
 def employee_expenses(token):
     require_token(token, 'EMPLOYEE_TOKEN')
+    purge_old_history()
     expenses, total_open = _fetch_expenses(get_db())
     return render_template('expenses.html',
                            expenses=expenses, total_open=total_open,
                            token=token, today=today_iso(),
+                           readonly=False, is_admin=False)
+
+
+@app.route('/e/<token>/expenses/history')
+def employee_expenses_history(token):
+    require_token(token, 'EMPLOYEE_TOKEN')
+    rows = _fetch_history(get_db(), days=30)
+    return render_template('expenses_history.html',
+                           rows=rows, token=token,
                            readonly=False, is_admin=False)
 
 
@@ -909,6 +939,17 @@ def admin_expenses(token):
                            total_all=total_all, total_settled=total_settled,
                            anomalies=anomalies,
                            token=token, today=today_iso(),
+                           readonly=True, is_admin=True)
+
+
+@app.route('/a/<token>/expenses/history')
+def admin_expenses_history(token):
+    role = require_admin_or_operator(token)
+    if role != 'admin':
+        abort(404)
+    rows = _fetch_history(get_db(), days=30)
+    return render_template('expenses_history.html',
+                           rows=rows, token=token,
                            readonly=True, is_admin=True)
 
 

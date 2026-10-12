@@ -159,6 +159,20 @@ a{color:var(--teal-dark);text-decoration:none}
 .expense-item.pending{background:linear-gradient(90deg, #fffbeb 0%, #fff 60%);
   border-left:4px solid var(--amber)}
 
+/* Lien vers historique */
+.history-link{display:block;margin:24px 0 12px;padding:16px;text-align:center;
+  background:var(--card);border:1.5px dashed var(--line);border-radius:16px;
+  color:var(--ink-soft);font-weight:600;font-size:14px;transition:all .15s}
+.history-link:hover{background:var(--soft);border-color:var(--teal);color:var(--teal-deep)}
+
+/* Retour historique → dépenses */
+.back-link{display:inline-block;margin-bottom:12px;color:var(--muted);
+  font-size:13px;font-weight:600;padding:6px 10px;border-radius:8px}
+.back-link:hover{background:var(--soft);color:var(--ink)}
+
+/* Badge soldée dans historique */
+.badge.badge-settled{background:#d1fae5;color:#065f46;margin-left:6px}
+
 /* ── Topbar ─────────────────────────────────────────── */
 .topbar{display:flex;align-items:center;justify-content:space-between;
   padding:18px 20px;background:#fff;
