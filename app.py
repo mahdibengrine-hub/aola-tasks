@@ -24,7 +24,7 @@ DATA_DIR = '/data' if os.path.isdir('/data') else os.path.join(os.path.dirname(_
 DB_PATH  = os.path.join(DATA_DIR, 'tasks.db')
 os.makedirs(DATA_DIR, exist_ok=True)
 
-LOCATIONS  = ['Garden', 'Boutique', 'Oran', 'Bureau', 'Autre']
+LOCATIONS  = ['Garden', 'Boutique', 'Oran', 'City Center Les Bananiers', 'Bureau', 'Autre']
 FR_DAYS    = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche']
 FR_DAYS_S  = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
 FR_MONTHS  = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin',
